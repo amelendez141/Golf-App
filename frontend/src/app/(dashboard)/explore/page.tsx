@@ -1,0 +1,366 @@
+'use client';
+
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Container } from '@/components/layout/Container';
+import { CourseMap } from '@/components/map/CourseMap';
+import { CourseBottomSheet } from '@/components/map/CourseBottomSheet';
+import { MapFilterChips, type MapFilters } from '@/components/map/MapFilterChips';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { useCourseSearch, useNearbyCourses } from '@/hooks/useCourseSearch';
+import { useUserStore } from '@/lib/stores/userStore';
+import { cn } from '@/lib/utils';
+import type { MapMarker, MapBounds } from '@/lib/types';
+
+export default function ExplorePage() {
+  const [selectedMarker, setSelectedMarker] = useState<MapMarker | null>(null);
+  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
+  const [mapFilters, setMapFilters] = useState<MapFilters>({
+    courseType: 'all',
+    availability: 'all',
+    price: 'all',
+  });
+  const { location, isLoadingLocation, requestLocation } = useUserStore();
+
+  const { query, setQuery, results: searchResults, isLoading: isSearching } = useCourseSearch();
+
+  const { data: nearbyCourses } = useNearbyCourses(
+    location?.lat,
+    location?.lng,
+    25
+  );
+
+  // Convert courses to map markers (mock data for now)
+  const markers: MapMarker[] = (nearbyCourses?.data || []).map((course) => ({
+    id: course.id,
+    lat: course.lat,
+    lng: course.lng,
+    course,
+    openSlots: Math.floor(Math.random() * 4), // Mock data
+    teeTimeCount: Math.floor(Math.random() * 5) + 1, // Mock data
+  }));
+
+  // Filter markers based on mapFilters
+  const filteredMarkers = useMemo(() => {
+    return markers.filter((marker) => {
+      const { course, openSlots } = marker;
+
+      // Filter by course type
+      if (mapFilters.courseType !== 'all') {
+        // Convert filter value to match CourseType enum (e.g., 'public' -> 'PUBLIC', 'semi-private' -> 'SEMI_PRIVATE')
+        const filterTypeUppercase = mapFilters.courseType.toUpperCase().replace('-', '_');
+        if (course.courseType !== filterTypeUppercase) {
+          return false;
+        }
+      }
+
+      // Filter by availability
+      if (mapFilters.availability !== 'all') {
+        if (mapFilters.availability === 'available') {
+          // 'available' means there are open slots
+          if (openSlots <= 0) {
+            return false;
+          }
+        } else if (mapFilters.availability === 'today') {
+          // TODO: Filter by tee times happening today
+          // For now, just check if there are open slots (placeholder logic)
+          if (openSlots <= 0) {
+            return false;
+          }
+        } else if (mapFilters.availability === 'tomorrow') {
+          // TODO: Filter by tee times happening tomorrow
+          // For now, just check if there are open slots (placeholder logic)
+          if (openSlots <= 0) {
+            return false;
+          }
+        }
+      }
+
+      // Filter by price (greenFee is in cents)
+      if (mapFilters.price !== 'all') {
+        const greenFee = course.greenFee ?? 0;
+        switch (mapFilters.price) {
+          case '$':
+            // Under $50 = under 5000 cents
+            if (greenFee >= 5000) return false;
+            break;
+          case '$$':
+            // $50-100 = 5000-10000 cents
+            if (greenFee < 5000 || greenFee >= 10000) return false;
+            break;
+          case '$$$':
+            // $100-200 = 10000-20000 cents
+            if (greenFee < 10000 || greenFee >= 20000) return false;
+            break;
+          case '$$$$':
+            // $200+ = 20000+ cents
+            if (greenFee < 20000) return false;
+            break;
+        }
+      }
+
+      return true;
+    });
+  }, [markers, mapFilters]);
+
+  const handleMarkerClick = useCallback((marker: MapMarker) => {
+    setSelectedMarker(marker);
+  }, []);
+
+  const handleBoundsChange = useCallback((bounds: MapBounds) => {
+    setMapBounds(bounds);
+  }, []);
+
+  const handleCloseSheet = useCallback(() => {
+    setSelectedMarker(null);
+  }, []);
+
+  const handleNearMeClick = useCallback(() => {
+    requestLocation();
+  }, [requestLocation]);
+
+  return (
+    <div className="h-[calc(100vh-4rem)] relative">
+      {/* Map */}
+      <CourseMap
+        markers={filteredMarkers}
+        onMarkerClick={handleMarkerClick}
+        onBoundsChange={handleBoundsChange}
+        initialCenter={location ? { lat: location.lat, lng: location.lng } : undefined}
+        selectedMarkerId={selectedMarker?.id}
+        className="h-full w-full"
+      />
+
+      {/* Search overlay */}
+      <div className="absolute top-4 left-4 right-4 lg:left-auto lg:right-4 lg:w-96 z-10">
+        <div className="bg-card rounded-xl shadow-lg p-3 space-y-3">
+          <Input
+            placeholder="Search courses..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            leftIcon={<SearchIcon className="h-4 w-4" />}
+            inputSize="md"
+          />
+
+          {/* Search results dropdown with animation */}
+          <AnimatePresence>
+            {query.length >= 2 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scaleY: 0.95 }}
+                animate={{ opacity: 1, y: 0, scaleY: 1 }}
+                exit={{ opacity: 0, y: -10, scaleY: 0.95 }}
+                transition={{ duration: 0.15 }}
+                style={{ originY: 0 }}
+                className="bg-card border border-primary/5 rounded-lg divide-y divide-primary/5 max-h-60 overflow-auto"
+              >
+                {isSearching ? (
+                  <div className="p-3 text-center text-text-muted text-sm">
+                    <motion.span
+                      animate={{ opacity: [1, 0.5, 1] }}
+                      transition={{ duration: 1.2, repeat: Infinity }}
+                    >
+                      Searching...
+                    </motion.span>
+                  </div>
+                ) : searchResults.length === 0 ? (
+                  <div className="p-3 text-center text-text-muted text-sm">
+                    No courses found
+                  </div>
+                ) : (
+                  searchResults.map((course, index) => (
+                    <motion.button
+                      key={course.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.03 }}
+                      className="w-full p-3 text-left hover:bg-primary/5 transition-colors"
+                      whileHover={{ x: 4 }}
+                      onClick={() => {
+                        // Would navigate to course or select marker
+                        setQuery('');
+                      }}
+                    >
+                      <p className="font-medium text-primary text-sm">
+                        {course.name}
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        {course.city}, {course.state}
+                      </p>
+                    </motion.button>
+                  ))
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Filter chips - positioned on map */}
+      <div className="absolute top-20 lg:top-4 left-4 right-4 lg:left-[420px] lg:right-auto z-10">
+        <MapFilterChips filters={mapFilters} onChange={setMapFilters} />
+      </div>
+
+      {/* Near me button */}
+      <div className="absolute bottom-24 lg:bottom-6 right-4 z-10">
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={handleNearMeClick}
+          isLoading={isLoadingLocation}
+          className="shadow-lg"
+          aria-label="Find courses near me"
+        >
+          <LocationIcon className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Legend */}
+      <div className="absolute bottom-24 lg:bottom-6 left-4 z-10">
+        <div className="bg-card rounded-lg shadow-lg p-3 space-y-2">
+          <div className="flex items-center gap-2 text-xs">
+            <div className="w-3 h-3 rounded-full bg-primary" />
+            <span className="text-text-secondary">Open tee times</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <div className="w-3 h-3 rounded-full bg-gray-400" />
+            <span className="text-text-secondary">No availability</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Course panel (desktop) */}
+      <AnimatePresence>
+        {selectedMarker && (
+          <motion.div
+            initial={{ opacity: 0, x: -20, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -20, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="hidden lg:block absolute top-4 left-4 z-10 w-80"
+          >
+            <div className="bg-card rounded-xl shadow-lg overflow-hidden">
+              <CoursePanelContent marker={selectedMarker} onClose={handleCloseSheet} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bottom sheet (mobile) */}
+      <CourseBottomSheet marker={selectedMarker} onClose={handleCloseSheet} />
+    </div>
+  );
+}
+
+function CoursePanelContent({
+  marker,
+  onClose,
+}: {
+  marker: MapMarker;
+  onClose: () => void;
+}) {
+  const { course, openSlots, teeTimeCount } = marker;
+
+  return (
+    <div className="p-4 space-y-4">
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="font-serif font-semibold text-primary">
+            {course.name}
+          </h3>
+          <p className="text-sm text-text-muted">
+            {course.city}, {course.state}
+          </p>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-1 rounded-lg hover:bg-primary/5 transition-colors"
+        >
+          <CloseIcon className="h-5 w-5 text-text-muted" />
+        </button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5">
+          <div
+            className={cn(
+              'h-2 w-2 rounded-full',
+              openSlots > 0 ? 'bg-success' : 'bg-gray-300'
+            )}
+          />
+          <span className="text-sm">
+            {teeTimeCount} tee {teeTimeCount === 1 ? 'time' : 'times'}
+          </span>
+        </div>
+        {openSlots > 0 && (
+          <span className="text-sm text-success font-medium">
+            {openSlots} {openSlots === 1 ? 'spot' : 'spots'} open
+          </span>
+        )}
+      </div>
+
+      <Button variant="primary" fullWidth>
+        View Tee Times
+      </Button>
+    </div>
+  );
+}
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={2}
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+      />
+    </svg>
+  );
+}
+
+function LocationIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={2}
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+      />
+    </svg>
+  );
+}
+
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={2}
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6 18L18 6M6 6l12 12"
+      />
+    </svg>
+  );
+}

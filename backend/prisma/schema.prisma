@@ -1,0 +1,313 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Industry {
+  TECHNOLOGY
+  FINANCE
+  HEALTHCARE
+  LEGAL
+  REAL_ESTATE
+  CONSULTING
+  MARKETING
+  SALES
+  ENGINEERING
+  EXECUTIVE
+  ENTREPRENEURSHIP
+  OTHER
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum TeeTimeStatus {
+  OPEN
+  FULL
+  CANCELLED
+  COMPLETED
+}
+
+enum NotificationType {
+  TEE_TIME_JOINED
+  TEE_TIME_LEFT
+  TEE_TIME_CANCELLED
+  TEE_TIME_REMINDER
+  NEW_MESSAGE
+  SLOT_AVAILABLE
+  MATCH_FOUND
+}
+
+enum CourseType {
+  PUBLIC
+  PRIVATE
+  SEMI_PRIVATE
+  RESORT
+  MUNICIPAL
+}
+
+model User {
+  id          String      @id @default(cuid())
+  clerkId     String      @unique
+  email       String      @unique
+  firstName   String?
+  lastName    String?
+  avatarUrl   String?
+  industry    Industry?
+  company     String?
+  jobTitle    String?
+  bio         String?
+  handicap    Float?
+  skillLevel  SkillLevel?
+  latitude    Float?
+  longitude   Float?
+  city        String?
+  state       String?
+  searchRadius Int        @default(50) // miles
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  hostedTeeTimes     TeeTime[]          @relation("HostedTeeTimes")
+  teeTimeSlots       TeeTimeSlot[]
+  messages           Message[]
+  notifications      Notification[]
+  favoriteCourses    FavoriteCourse[]
+  conditionReports   CourseCondition[]
+  notesWritten       MeetingNote[]      @relation("NotesWritten")
+  notesAbout         MeetingNote[]      @relation("NotesAbout")
+  reviewsWritten     PlayerReview[]     @relation("ReviewsWritten")
+  reviewsReceived    PlayerReview[]     @relation("ReviewsReceived")
+  connectionsSent    Connection[]       @relation("ConnectionsSent")
+  connectionsReceived Connection[]      @relation("ConnectionsReceived")
+
+  @@index([clerkId])
+  @@index([industry])
+  @@index([skillLevel])
+}
+
+model Course {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  address     String
+  city        String
+  state       String
+  zipCode     String
+  country     String     @default("USA")
+  latitude    Float
+  longitude   Float
+  phone       String?
+  website     String?
+  courseType  CourseType
+  holes       Int        @default(18)
+  par         Int?
+  rating      Float?
+  slope       Int?
+  yardage     Int?
+  greenFee    Int?       // in cents
+  amenities   String[]   @default([])
+  imageUrl    String?
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  teeTimes         TeeTime[]
+  favoritedBy      FavoriteCourse[]
+  conditionReports CourseCondition[]
+
+  @@index([city, state])
+  @@index([courseType])
+}
+
+model TeeTime {
+  id                 String        @id @default(cuid())
+  hostId             String
+  courseId           String
+  dateTime           DateTime
+  totalSlots         Int           @default(4)
+  industryPreference Industry[]
+  skillPreference    SkillLevel[]
+  notes              String?
+  status             TeeTimeStatus @default(OPEN)
+  version            Int           @default(0) // Optimistic locking
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  // Relations
+  host         User           @relation("HostedTeeTimes", fields: [hostId], references: [id], onDelete: Cascade)
+  course       Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  slots        TeeTimeSlot[]
+  messages     Message[]
+  meetingNotes MeetingNote[]
+  reviews      PlayerReview[]
+  connections  Connection[]
+
+  @@index([hostId])
+  @@index([courseId])
+  @@index([dateTime])
+  @@index([status])
+}
+
+model TeeTimeSlot {
+  id         String   @id @default(cuid())
+  teeTimeId  String
+  userId     String?
+  slotNumber Int
+  joinedAt   DateTime?
+
+  // Relations
+  teeTime TeeTime @relation(fields: [teeTimeId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([teeTimeId, slotNumber])
+  @@unique([teeTimeId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  teeTimeId String
+  senderId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  teeTime TeeTime @relation(fields: [teeTimeId], references: [id], onDelete: Cascade)
+  sender  User    @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([teeTimeId, createdAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+}
+
+model FavoriteCourse {
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@id([userId, courseId])
+}
+
+model CourseCondition {
+  id        String   @id @default(cuid())
+  courseId  String
+  userId    String
+  greens    Int      // 1-5 rating
+  fairways  Int      // 1-5 rating
+  bunkers   Int?     // 1-5 rating (optional)
+  pace      Int?     // minutes over par time (optional)
+  notes     String?
+  alerts    String[] @default([]) // e.g., "Greens Aerated", "Cart Path Only"
+  photoUrl  String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, createdAt])
+  @@index([userId])
+}
+
+// Private notes about playing partners (Business Golf feature)
+model MeetingNote {
+  id            String   @id @default(cuid())
+  userId        String   // The user who wrote the note
+  aboutUserId   String   // The user the note is about
+  teeTimeId     String?  // Optional: which round this relates to
+  content       String
+  tags          String[] @default([]) // e.g., "follow-up", "potential-client", "good-contact"
+  contactInfo   Json?    // Additional contact info captured
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user      User     @relation("NotesWritten", fields: [userId], references: [id], onDelete: Cascade)
+  aboutUser User     @relation("NotesAbout", fields: [aboutUserId], references: [id], onDelete: Cascade)
+  teeTime   TeeTime? @relation(fields: [teeTimeId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, aboutUserId, teeTimeId])
+  @@index([userId])
+  @@index([aboutUserId])
+}
+
+// Player reviews after rounds
+model PlayerReview {
+  id          String   @id @default(cuid())
+  reviewerId  String   // Who wrote the review
+  revieweeId  String   // Who is being reviewed
+  teeTimeId   String   // Which round this is for
+  rating      Int      // 1-5 stars
+  playAgain   Boolean  // Would play again?
+  punctuality Int?     // 1-5: On time?
+  pace        Int?     // 1-5: Good pace of play?
+  etiquette   Int?     // 1-5: Golf etiquette?
+  networking  Int?     // 1-5: Good conversationalist?
+  comment     String?
+  isPublic    Boolean  @default(false) // Show on profile?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  reviewer User    @relation("ReviewsWritten", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewee User    @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade)
+  teeTime  TeeTime @relation(fields: [teeTimeId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewerId, revieweeId, teeTimeId])
+  @@index([revieweeId])
+  @@index([teeTimeId])
+}
+
+// Connection requests after rounds
+model Connection {
+  id          String   @id @default(cuid())
+  requesterId String
+  receiverId  String
+  teeTimeId   String?  // Optional: which round sparked the connection
+  status      ConnectionStatus @default(PENDING)
+  message     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  requester User     @relation("ConnectionsSent", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver  User     @relation("ConnectionsReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+  teeTime   TeeTime? @relation(fields: [teeTimeId], references: [id], onDelete: SetNull)
+
+  @@unique([requesterId, receiverId])
+  @@index([receiverId, status])
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}

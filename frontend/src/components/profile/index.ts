@@ -1,0 +1,1 @@
+export { GolfResume } from './GolfResume';

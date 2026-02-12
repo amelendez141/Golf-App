@@ -1,0 +1,1 @@
+export { QuickMatchCard } from './QuickMatchCard';

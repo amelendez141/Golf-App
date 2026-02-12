@@ -1,0 +1,258 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Industry {
+  FINANCE
+  PRIVATE_CAPITAL
+  TECH
+  HEALTHCARE
+  LEGAL
+  REAL_ESTATE
+  CONSULTING
+  ENERGY
+  MEDIA_ENTERTAINMENT
+  GOVERNMENT
+  EDUCATION
+  RETIRED
+  OTHER
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  COMPETITIVE
+}
+
+enum CourseType {
+  PUBLIC
+  SEMI_PRIVATE
+  PRIVATE
+  RESORT
+}
+
+enum TeeTimeStatus {
+  OPEN
+  FULL
+  CANCELLED
+  COMPLETED
+}
+
+enum TeeTimeSkillLevel {
+  ANY
+  BEGINNER_FRIENDLY
+  INTERMEDIATE
+  COMPETITIVE
+}
+
+enum SlotStatus {
+  OPEN
+  FILLED
+  CANCELLED
+}
+
+enum NotificationType {
+  SLOT_JOINED
+  SLOT_LEFT
+  TEE_TIME_CANCELLED
+  TEE_TIME_REMINDER
+  NEW_MATCH
+  MESSAGE_RECEIVED
+  TEE_TIME_UPDATED
+  WELCOME
+}
+
+// Models
+model User {
+  id          String    @id @default(uuid())
+  clerkId     String    @unique
+  email       String    @unique
+  firstName   String
+  lastName    String
+  displayName String?
+  avatarUrl   String?
+
+  industry    Industry
+  subIndustry String?
+  company     String?
+  jobTitle    String?
+
+  city        String?
+  state       String?
+  country     String?
+  latitude    Float?
+  longitude   Float?
+
+  handicap    Float?
+  skillLevel  SkillLevel @default(INTERMEDIATE)
+  bio         String?
+
+  isVerified  Boolean   @default(false)
+  isPublic    Boolean   @default(true)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  hostedTeeTimes  TeeTime[]       @relation("TeeTimeHost")
+  slots           TeeTimeSlot[]
+  messages        Message[]
+  notifications   Notification[]
+  favoriteCourses FavoriteCourse[]
+  pushSubscriptions PushSubscription[]
+
+  @@index([industry])
+  @@index([latitude, longitude])
+  @@index([city, state, country])
+}
+
+model Course {
+  id          String      @id @default(uuid())
+  name        String
+  slug        String      @unique
+
+  address     String?
+  city        String
+  state       String?
+  country     String
+  latitude    Float
+  longitude   Float
+
+  courseType  CourseType  @default(PUBLIC)
+  holes       Int         @default(18)
+  par         Int?
+  rating      Float?
+  slope       Int?
+
+  website     String?
+  phone       String?
+  imageUrl    String?
+  description String?
+  amenities   String[]    @default([])
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  teeTimes        TeeTime[]
+  favoritedBy     FavoriteCourse[]
+
+  @@index([latitude, longitude])
+  @@index([city, country])
+}
+
+model TeeTime {
+  id                  String            @id @default(uuid())
+  hostId              String
+  courseId            String
+
+  dateTime            DateTime
+  totalSlots          Int               @default(4)
+
+  industryPreference  Industry?
+  skillLevel          TeeTimeSkillLevel @default(ANY)
+
+  pricePerPerson      Float?
+  currency            String            @default("USD")
+  notes               String?
+
+  status              TeeTimeStatus     @default(OPEN)
+  isPublic            Boolean           @default(true)
+
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  // Relations
+  host                User              @relation("TeeTimeHost", fields: [hostId], references: [id])
+  course              Course            @relation(fields: [courseId], references: [id])
+  slots               TeeTimeSlot[]
+  messages            Message[]
+
+  @@index([hostId])
+  @@index([courseId])
+  @@index([dateTime])
+  @@index([status])
+  @@index([industryPreference])
+}
+
+model TeeTimeSlot {
+  id          String      @id @default(uuid())
+  teeTimeId   String
+  userId      String?
+  slotNumber  Int
+  status      SlotStatus  @default(OPEN)
+  joinedAt    DateTime?
+
+  // Relations
+  teeTime     TeeTime     @relation(fields: [teeTimeId], references: [id], onDelete: Cascade)
+  user        User?       @relation(fields: [userId], references: [id])
+
+  @@unique([teeTimeId, slotNumber])
+  @@index([userId])
+}
+
+model Message {
+  id          String    @id @default(uuid())
+  teeTimeId   String
+  senderId    String
+  content     String
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  teeTime     TeeTime   @relation(fields: [teeTimeId], references: [id], onDelete: Cascade)
+  sender      User      @relation(fields: [senderId], references: [id])
+
+  @@index([teeTimeId])
+  @@index([senderId])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // Relations
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model FavoriteCourse {
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@id([userId, courseId])
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
