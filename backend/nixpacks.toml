@@ -1,8 +1,12 @@
 [phases.setup]
-nixPkgs = ["openssl", "libuuid"]
+nixPkgs = ["openssl_1_1", "libuuid", "glibc"]
+aptPkgs = ["libssl1.1", "openssl"]
 
 [phases.build]
 cmds = ["npm ci", "npx prisma generate", "npm run build"]
+
+[variables]
+PRISMA_CLI_BINARY_TARGETS = "linux-musl-openssl-3.0.x"
 
 [start]
 cmd = "node dist/index.js"
