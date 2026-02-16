@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '@/components/layout/Container';
 import { CourseMap } from '@/components/map/CourseMap';
@@ -11,11 +12,14 @@ import { Input } from '@/components/ui/Input';
 import { useCourseSearch, useNearbyCourses } from '@/hooks/useCourseSearch';
 import { useUserStore } from '@/lib/stores/userStore';
 import { cn } from '@/lib/utils';
-import type { MapMarker, MapBounds } from '@/lib/types';
+import { api } from '@/lib/api';
+import type { MapMarker, MapBounds, Course } from '@/lib/types';
 
 export default function ExplorePage() {
+  const router = useRouter();
   const [selectedMarker, setSelectedMarker] = useState<MapMarker | null>(null);
   const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [mapFilters, setMapFilters] = useState<MapFilters>({
     courseType: 'all',
     availability: 'all',
@@ -28,11 +32,29 @@ export default function ExplorePage() {
   const { data: nearbyCourses } = useNearbyCourses(
     location?.lat,
     location?.lng,
-    25
+    50 // Increased radius
   );
 
-  // Convert courses to map markers (mock data for now)
-  const markers: MapMarker[] = (nearbyCourses?.data || []).map((course) => ({
+  // Load all courses on mount (fallback when no location)
+  useEffect(() => {
+    async function loadCourses() {
+      try {
+        const response = await api.getCourses({ limit: 100 });
+        if (response.success && response.data) {
+          setAllCourses(response.data);
+        }
+      } catch (err) {
+        console.error('Failed to load courses:', err);
+      }
+    }
+    loadCourses();
+  }, []);
+
+  // Use nearby courses if available, otherwise fall back to all courses
+  const coursesToShow = nearbyCourses?.data?.length ? nearbyCourses.data : allCourses;
+
+  // Convert courses to map markers
+  const markers: MapMarker[] = coursesToShow.map((course: any) => ({
     id: course.id,
     lat: course.lat,
     lng: course.lng,
@@ -121,7 +143,7 @@ export default function ExplorePage() {
   }, [requestLocation]);
 
   return (
-    <div className="h-[calc(100vh-4rem)] relative">
+    <div className="h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] relative">
       {/* Map */}
       <CourseMap
         markers={filteredMarkers}
@@ -132,15 +154,16 @@ export default function ExplorePage() {
         className="h-full w-full"
       />
 
-      {/* Search overlay */}
-      <div className="absolute top-4 left-4 right-4 lg:left-auto lg:right-4 lg:w-96 z-10">
-        <div className="bg-card rounded-xl shadow-lg p-3 space-y-3">
+      {/* Search overlay - mobile optimized */}
+      <div className="absolute top-3 sm:top-4 left-3 right-3 sm:left-4 sm:right-4 lg:left-auto lg:right-4 lg:w-96 z-10">
+        <div className="bg-card rounded-xl shadow-lg p-2.5 sm:p-3 space-y-2 sm:space-y-3">
           <Input
             placeholder="Search courses..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            leftIcon={<SearchIcon className="h-4 w-4" />}
-            inputSize="md"
+            leftIcon={<SearchIcon className="h-5 w-5" />}
+            inputSize="lg"
+            className="touch-manipulation"
           />
 
           {/* Search results dropdown with animation */}
@@ -177,7 +200,8 @@ export default function ExplorePage() {
                       className="w-full p-3 text-left hover:bg-primary/5 transition-colors"
                       whileHover={{ x: 4 }}
                       onClick={() => {
-                        // Would navigate to course or select marker
+                        // Navigate to course detail page
+                        router.push(`/course/${course.slug}`);
                         setQuery('');
                       }}
                     >
@@ -196,27 +220,27 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      {/* Filter chips - positioned on map */}
-      <div className="absolute top-20 lg:top-4 left-4 right-4 lg:left-[420px] lg:right-auto z-10">
+      {/* Filter chips - positioned on map with horizontal scroll on mobile */}
+      <div className="absolute top-[72px] sm:top-20 lg:top-4 left-0 right-0 sm:left-4 sm:right-4 lg:left-[420px] lg:right-auto z-10 px-3 sm:px-0">
         <MapFilterChips filters={mapFilters} onChange={setMapFilters} />
       </div>
 
-      {/* Near me button */}
-      <div className="absolute bottom-24 lg:bottom-6 right-4 z-10">
+      {/* Near me button - positioned above bottom nav on mobile */}
+      <div className="absolute bottom-28 sm:bottom-24 lg:bottom-6 right-3 sm:right-4 z-10">
         <Button
           variant="secondary"
-          size="icon"
+          size="icon-lg"
           onClick={handleNearMeClick}
           isLoading={isLoadingLocation}
-          className="shadow-lg"
+          className="shadow-lg h-14 w-14 touch-manipulation"
           aria-label="Find courses near me"
         >
-          <LocationIcon className="h-5 w-5" />
+          <LocationIcon className="h-6 w-6" />
         </Button>
       </div>
 
-      {/* Legend */}
-      <div className="absolute bottom-24 lg:bottom-6 left-4 z-10">
+      {/* Legend - hidden on mobile to save space, shown as tooltip elsewhere */}
+      <div className="absolute bottom-28 sm:bottom-24 lg:bottom-6 left-3 sm:left-4 z-10 hidden sm:block">
         <div className="bg-card rounded-lg shadow-lg p-3 space-y-2">
           <div className="flex items-center gap-2 text-xs">
             <div className="w-3 h-3 rounded-full bg-primary" />

@@ -4,12 +4,19 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { useDemoStore } from '@/lib/stores/demoStore';
+import { useAuth } from '@/lib/auth';
 
 export function WelcomeModal() {
+  const { isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const { setTourOpen, setTourStep } = useDemoStore();
 
   useEffect(() => {
+    // Don't show welcome modal for authenticated users
+    if (isAuthenticated) {
+      return;
+    }
+
     // Check if user has seen the welcome modal
     const hasSeenWelcome = localStorage.getItem('linkup-welcome-seen');
     if (!hasSeenWelcome) {
@@ -17,7 +24,7 @@ export function WelcomeModal() {
       const timer = setTimeout(() => setIsOpen(true), 500);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const handleClose = useCallback(() => {
     localStorage.setItem('linkup-welcome-seen', 'true');
@@ -53,9 +60,9 @@ export function WelcomeModal() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', duration: 0.5 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
+            className="fixed inset-4 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 sm:w-full sm:max-w-lg flex items-center justify-center"
           >
-            <div className="bg-card rounded-2xl shadow-2xl overflow-hidden mx-4">
+            <div className="bg-card rounded-2xl shadow-2xl overflow-hidden w-full max-h-[90vh] overflow-y-auto">
               {/* Hero section */}
               <div className="bg-hero-gradient p-8 text-center relative overflow-hidden">
                 <div className="absolute inset-0 grain-overlay opacity-50" />

@@ -8,8 +8,9 @@ import type {
   Message,
   Notification,
 } from './types';
+import { getAuthToken } from './auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 class ApiClient {
   private baseUrl: string;
@@ -28,11 +29,19 @@ class ApiClient {
       'Content-Type': 'application/json',
     };
 
+    // First try the custom token getter (for Clerk compatibility)
     if (this.getToken) {
       const token = await this.getToken();
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        return headers;
       }
+    }
+
+    // Fall back to local auth token
+    const localToken = getAuthToken();
+    if (localToken) {
+      headers['Authorization'] = `Bearer ${localToken}`;
     }
 
     return headers;
@@ -191,6 +200,26 @@ class ApiClient {
     return this.request<ApiResponse<{ isFavorited: boolean }>>(`/api/courses/${courseId}/favorite`, {
       method: 'POST',
     });
+  }
+
+  async searchCourses(query: string): Promise<ApiResponse<Course[]>> {
+    const params = new URLSearchParams();
+    params.set('query', query);
+    params.set('limit', '20');
+    return this.request<ApiResponse<Course[]>>(`/api/courses?${params.toString()}`);
+  }
+
+  async getNearbyCourses(lat: number, lng: number, radius: number = 50): Promise<ApiResponse<Course[]>> {
+    const params = new URLSearchParams();
+    params.set('latitude', lat.toString());
+    params.set('longitude', lng.toString());
+    params.set('radius', radius.toString());
+    params.set('limit', '100');
+    return this.request<ApiResponse<Course[]>>(`/api/courses?${params.toString()}`);
+  }
+
+  async getCourse(id: string): Promise<ApiResponse<Course>> {
+    return this.request<ApiResponse<Course>>(`/api/courses/${id}`);
   }
 
   // Users
