@@ -7,10 +7,14 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY . .
+
+# Set environment variables for build
+ENV NEXT_PUBLIC_API_URL=https://fabulous-vitality-production-a112.up.railway.app
+ENV NEXT_PUBLIC_WS_URL=wss://fabulous-vitality-production-a112.up.railway.app
 
 # Build the application
 RUN npm run build
