@@ -75,7 +75,7 @@ export function WeatherWidget({
         )}
       >
         <WeatherIcon icon={data.icon} className="h-5 w-5 text-accent" />
-        <span className="font-medium text-primary">{data.temperature}°F</span>
+        <span className="font-medium text-primary">{Math.round(data.temperature)}°F</span>
       </motion.div>
     );
   }
@@ -97,8 +97,8 @@ export function WeatherWidget({
           </div>
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-primary">{data.temperature}°</span>
-              <span className="text-sm text-text-muted">Feels like {data.feelsLike}°</span>
+              <span className="text-3xl font-bold text-primary">{Math.round(data.temperature)}°</span>
+              <span className="text-sm text-text-muted">Feels like {Math.round(data.feelsLike)}°</span>
             </div>
             <p className="text-text-secondary">{data.conditions}</p>
           </div>
@@ -113,18 +113,18 @@ export function WeatherWidget({
         <div className="text-center">
           <WindIcon className="h-5 w-5 text-text-muted mx-auto mb-1" />
           <p className="text-sm font-medium text-primary">
-            {data.windSpeed} mph
+            {Math.round(data.windSpeed)} mph
           </p>
           <p className="text-xs text-text-muted">{data.windDirection}</p>
         </div>
         <div className="text-center">
           <HumidityIcon className="h-5 w-5 text-text-muted mx-auto mb-1" />
-          <p className="text-sm font-medium text-primary">{data.humidity}%</p>
+          <p className="text-sm font-medium text-primary">{Math.round(data.humidity)}%</p>
           <p className="text-xs text-text-muted">Humidity</p>
         </div>
         <div className="text-center">
           <ThermometerIcon className="h-5 w-5 text-text-muted mx-auto mb-1" />
-          <p className="text-sm font-medium text-primary">{data.feelsLike}°</p>
+          <p className="text-sm font-medium text-primary">{Math.round(data.feelsLike)}°</p>
           <p className="text-xs text-text-muted">Feels Like</p>
         </div>
       </div>
