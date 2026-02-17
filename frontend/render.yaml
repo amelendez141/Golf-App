@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: linkup-golf-frontend
+    runtime: node
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://fabulous-vitality-production-a112.up.railway.app
+      - key: NEXT_PUBLIC_WS_URL
+        value: wss://fabulous-vitality-production-a112.up.railway.app
+      - key: NODE_VERSION
+        value: 20
