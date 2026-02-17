@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/auth';
 
 interface DemoUser {
   id: string;
@@ -19,12 +20,16 @@ interface DemoUser {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export function UserSwitcher() {
+  const { isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [users, setUsers] = useState<DemoUser[]>([]);
   const [currentUser, setCurrentUser] = useState<DemoUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Don't fetch if authenticated
+    if (isAuthenticated) return;
+
     // Fetch available demo users
     async function fetchUsers() {
       try {
@@ -44,7 +49,14 @@ export function UserSwitcher() {
       }
     }
     fetchUsers();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
+  // Hide when user is authenticated with local auth
+  // Note: Must be after all hooks to comply with Rules of Hooks
+  if (isAuthenticated) {
+    return null;
+  }
 
   const switchUser = async (user: DemoUser) => {
     try {

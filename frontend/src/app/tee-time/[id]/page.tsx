@@ -75,14 +75,14 @@ export default function TeeTimeDetailPage({ params }: PageProps) {
 
   const teeTime = data;
   const openSlots = countOpenSlots(teeTime.slots);
-  const firstOpenSlot = teeTime.slots.find((slot) => slot.status === 'open');
+  const firstOpenSlot = teeTime.slots.find((slot) => !slot.user);
 
   const handleJoin = async (e: React.MouseEvent) => {
     if (!firstOpenSlot) return;
     try {
       await joinMutation.mutateAsync({
         teeTimeId: teeTime.id,
-        slotPosition: firstOpenSlot.position,
+        slotNumber: firstOpenSlot.slotNumber,
       });
       // Trigger celebration
       celebrate(e);
@@ -109,7 +109,7 @@ export default function TeeTimeDetailPage({ params }: PageProps) {
       <Navbar />
 
       {/* Hero Image */}
-      <div className="relative h-64 md:h-80 overflow-hidden">
+      <div className="relative h-48 sm:h-64 md:h-80 overflow-hidden">
         {teeTime.course.imageUrl ? (
           <Image
             src={teeTime.course.imageUrl}
@@ -117,36 +117,39 @@ export default function TeeTimeDetailPage({ params }: PageProps) {
             fill
             className="object-cover"
             priority
+            sizes="100vw"
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/5" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
         {/* Course info overlay */}
-        <Container className="absolute bottom-0 left-0 right-0 pb-6">
-          <div className="flex items-end justify-between gap-4">
+        <Container className="absolute bottom-0 left-0 right-0 pb-4 sm:pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-4">
             <div>
-              <h1 className="font-serif text-2xl md:text-3xl font-bold text-white mb-1">
+              <h1 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1">
                 {teeTime.course.name}
               </h1>
-              <p className="text-white/80">
+              <p className="text-white/80 text-sm sm:text-base">
                 {teeTime.course.city}, {teeTime.course.state}
               </p>
             </div>
-            <div className="hidden sm:flex items-center gap-2">
-              <Badge variant="secondary" size="lg">
+            <div className="flex items-center gap-2 mt-2 sm:mt-0">
+              <Badge variant="secondary" size="sm" className="sm:text-sm">
                 {COURSE_TYPES[teeTime.course.courseType]}
               </Badge>
-              <Badge variant="secondary" size="lg">
-                {PRICE_LEVEL_LABELS[teeTime.course.priceLevel]}
-              </Badge>
+              {teeTime.course.greenFee && (
+                <Badge variant="secondary" size="sm" className="sm:text-sm">
+                  ${(teeTime.course.greenFee / 100).toFixed(0)}
+                </Badge>
+              )}
             </div>
           </div>
         </Container>
       </div>
 
-      <Container className="py-6">
+      <Container className="py-4 sm:py-6 pb-24 sm:pb-6">
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Main content */}
           <motion.div
@@ -190,14 +193,18 @@ export default function TeeTimeDetailPage({ params }: PageProps) {
             {/* Players Card */}
             <Card>
               <h2 className="font-serif text-lg font-semibold text-primary mb-4">
-                Players ({teeTime.slots.filter((s) => s.status !== 'open').length}/
+                Players ({teeTime.slots.filter((s) => s.user).length}/
                 {teeTime.totalSlots})
               </h2>
 
               <div className="space-y-4">
-                {teeTime.slots.map((slot, index) => (
+                {teeTime.slots.map((slot, index) => {
+                  const isHost = slot.user?.id === teeTime.host?.id;
+                  const isOpen = !slot.user;
+
+                  return (
                   <motion.div
-                    key={slot.position}
+                    key={slot.slotNumber}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{
@@ -207,7 +214,7 @@ export default function TeeTimeDetailPage({ params }: PageProps) {
                     }}
                     className={cn(
                       'flex items-center gap-4 p-3 rounded-xl',
-                      slot.status === 'open'
+                      isOpen
                         ? 'border-2 border-dashed border-primary/10 bg-secondary'
                         : 'bg-secondary'
                     )}
@@ -221,7 +228,7 @@ export default function TeeTimeDetailPage({ params }: PageProps) {
                           size="lg"
                           className={cn(
                             'ring-2',
-                            slot.status === 'host' ? 'ring-accent' : 'ring-primary/10'
+                            isHost ? 'ring-accent' : 'ring-primary/10'
                           )}
                         />
                         <div className="flex-1 min-w-0">
@@ -229,7 +236,7 @@ export default function TeeTimeDetailPage({ params }: PageProps) {
                             <span className="font-medium text-primary">
                               {slot.user.firstName} {slot.user.lastName}
                             </span>
-                            {slot.status === 'host' && (
+                            {isHost && (
                               <Badge variant="accent" size="sm">
                                 Host
                               </Badge>
@@ -265,7 +272,8 @@ export default function TeeTimeDetailPage({ params }: PageProps) {
                       </div>
                     )}
                   </motion.div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
 
@@ -311,15 +319,15 @@ export default function TeeTimeDetailPage({ params }: PageProps) {
             )}
           </motion.div>
 
-          {/* Sidebar */}
+          {/* Sidebar - becomes bottom sticky on mobile */}
           <motion.div
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
           >
-            {/* Join Card */}
-            <Card className="sticky top-20">
+            {/* Join Card - Sticky on both mobile (bottom) and desktop (top) */}
+            <Card className="lg:sticky lg:top-20">
               <div className="text-center mb-4 relative">
                 {/* Success checkmark overlay */}
                 <AnimatePresence>
@@ -347,14 +355,15 @@ export default function TeeTimeDetailPage({ params }: PageProps) {
                 <Button
                   variant="accent"
                   fullWidth
-                  size="lg"
+                  size="xl"
                   onClick={handleJoin}
                   isLoading={joinMutation.isPending}
+                  className="touch-manipulation"
                 >
                   Request to Join
                 </Button>
               ) : (
-                <Button variant="secondary" fullWidth size="lg" disabled>
+                <Button variant="secondary" fullWidth size="xl" disabled>
                   Fully Booked
                 </Button>
               )}
@@ -363,6 +372,26 @@ export default function TeeTimeDetailPage({ params }: PageProps) {
                 The host will review and approve your request
               </p>
             </Card>
+
+            {/* Mobile-only floating join button */}
+            <div className="fixed bottom-20 left-4 right-4 lg:hidden z-40 safe-bottom">
+              {openSlots > 0 ? (
+                <Button
+                  variant="accent"
+                  fullWidth
+                  size="xl"
+                  onClick={handleJoin}
+                  isLoading={joinMutation.isPending}
+                  className="shadow-lg touch-manipulation"
+                >
+                  Request to Join - {openSlots} {openSlots === 1 ? 'spot' : 'spots'} left
+                </Button>
+              ) : (
+                <Button variant="secondary" fullWidth size="xl" disabled className="shadow-lg">
+                  Fully Booked
+                </Button>
+              )}
+            </div>
 
             {/* Host Card */}
             <Card>

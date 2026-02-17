@@ -5,7 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const inputVariants = cva(
-  'flex w-full rounded-lg border bg-card text-sm transition-all duration-200 placeholder:text-text-muted focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+  'flex w-full rounded-xl border bg-card text-base transition-all duration-200 placeholder:text-text-muted focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation',
   {
     variants: {
       variant: {
@@ -17,9 +17,9 @@ const inputVariants = cva(
           'border-success focus:border-success focus:ring-2 focus:ring-success/20',
       },
       inputSize: {
-        sm: 'h-8 px-3 text-sm',
-        md: 'h-10 px-4',
-        lg: 'h-12 px-4 text-base',
+        sm: 'h-11 px-3 text-base', // min 44px for touch
+        md: 'h-12 px-4 text-base', // 48px for comfortable touch
+        lg: 'h-14 px-4 text-base', // 56px for spacious touch
       },
     },
     defaultVariants: {

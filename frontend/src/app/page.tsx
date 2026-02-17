@@ -14,30 +14,30 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-hero-gradient grain-overlay" />
 
         <Container className="relative">
-          <div className="flex flex-col items-center justify-center py-24 md:py-32 lg:py-40 text-center">
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 max-w-4xl">
+          <div className="flex flex-col items-center justify-center py-16 sm:py-24 md:py-32 lg:py-40 text-center px-2 sm:px-0">
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 sm:mb-6 max-w-4xl leading-tight">
               Find Your{' '}
               <span className="text-accent">Foursome.</span>
             </h1>
-            <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl">
+            <p className="text-base sm:text-lg md:text-xl text-white/80 mb-8 sm:mb-10 max-w-2xl px-2 leading-relaxed">
               Connect with professionals in your industry over a round of golf.
               Discover open tee times, join groups, and build meaningful relationships on the course.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/sign-up">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto px-4 sm:px-0">
+              <Link href="/sign-up" className="w-full sm:w-auto">
                 <Button
                   variant="accent"
                   size="xl"
-                  className="min-w-[200px]"
+                  className="w-full sm:min-w-[200px]"
                 >
                   Get Started Free
                 </Button>
               </Link>
-              <Link href="/sign-in">
+              <Link href="/sign-in" className="w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="xl"
-                  className="min-w-[200px] border-white/30 text-white hover:bg-white/10"
+                  className="w-full sm:min-w-[200px] border-white/30 text-white hover:bg-white/10"
                 >
                   Sign In
                 </Button>
@@ -63,19 +63,19 @@ export default function LandingPage() {
       </section>
 
       {/* Value Props Section */}
-      <section className="py-20 md:py-28">
+      <section className="py-12 sm:py-20 md:py-28">
         <Container>
-          <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-primary mb-4">
+          <div className="text-center mb-10 sm:mb-16 px-2">
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-3 sm:mb-4">
               Golf is better with the right partners
             </h2>
-            <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-              Whether you're looking to network, make new friends, or simply fill that fourth spot,
+            <p className="text-text-secondary text-base sm:text-lg max-w-2xl mx-auto">
+              Whether you&apos;re looking to network, make new friends, or simply fill that fourth spot,
               LinkUp connects you with like-minded golfers.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             <ValuePropCard
               icon={<NetworkIcon />}
               title="Industry Networking"
@@ -96,18 +96,18 @@ export default function LandingPage() {
       </section>
 
       {/* Social Proof Section */}
-      <section className="py-20 md:py-28 bg-card">
+      <section className="py-12 sm:py-20 md:py-28 bg-card">
         <Container>
-          <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-primary mb-4">
+          <div className="text-center mb-10 sm:mb-16 px-2">
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-3 sm:mb-4">
               Trusted by professionals
             </h2>
-            <p className="text-text-secondary text-lg">
-              Join thousands of golfers who've found their perfect playing partners.
+            <p className="text-text-secondary text-base sm:text-lg">
+              Join thousands of golfers who&apos;ve found their perfect playing partners.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             <TestimonialCard
               quote="Finally, a way to meet other finance professionals on the course. Made three great connections in my first month."
               author="Michael R."
@@ -131,18 +131,18 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-28">
+      <section className="py-12 sm:py-20 md:py-28 px-4 sm:px-0">
         <Container size="md">
-          <div className="bg-primary rounded-3xl p-8 md:p-12 text-center grain-overlay relative overflow-hidden">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-white mb-4 relative z-10">
+          <div className="bg-primary rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 text-center grain-overlay relative overflow-hidden">
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4 relative z-10">
               Ready to find your foursome?
             </h2>
-            <p className="text-white/80 text-lg mb-8 max-w-lg mx-auto relative z-10">
+            <p className="text-white/80 text-base sm:text-lg mb-6 sm:mb-8 max-w-lg mx-auto relative z-10">
               Join LinkUp today and start connecting with professionals who share your passion for golf.
             </p>
             <div className="relative z-10">
               <Link href="/sign-up">
-                <Button variant="accent" size="xl">
+                <Button variant="accent" size="xl" className="w-full sm:w-auto">
                   Create Free Account
                 </Button>
               </Link>
@@ -192,12 +192,12 @@ function ValuePropCard({
   description: string;
 }) {
   return (
-    <div className="bg-card rounded-2xl p-8 shadow-card hover:shadow-card-hover transition-shadow">
-      <div className="w-14 h-14 rounded-xl bg-primary/5 flex items-center justify-center mb-6 text-primary">
+    <div className="bg-card rounded-xl sm:rounded-2xl p-5 sm:p-8 shadow-card hover:shadow-card-hover transition-shadow touch-manipulation active:scale-[0.99]">
+      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-primary/5 flex items-center justify-center mb-4 sm:mb-6 text-primary">
         {icon}
       </div>
-      <h3 className="font-serif text-xl font-semibold text-primary mb-3">{title}</h3>
-      <p className="text-text-secondary">{description}</p>
+      <h3 className="font-serif text-lg sm:text-xl font-semibold text-primary mb-2 sm:mb-3">{title}</h3>
+      <p className="text-text-secondary text-sm sm:text-base leading-relaxed">{description}</p>
     </div>
   );
 }
@@ -214,14 +214,14 @@ function TestimonialCard({
   industry: string;
 }) {
   return (
-    <div className="bg-secondary rounded-2xl p-8">
-      <div className="mb-6">
-        <QuoteIcon className="h-8 w-8 text-accent/30" />
+    <div className="bg-secondary rounded-xl sm:rounded-2xl p-5 sm:p-8">
+      <div className="mb-4 sm:mb-6">
+        <QuoteIcon className="h-6 w-6 sm:h-8 sm:w-8 text-accent/30" />
       </div>
-      <p className="text-text-secondary mb-6 leading-relaxed">&ldquo;{quote}&rdquo;</p>
+      <p className="text-text-secondary mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">&ldquo;{quote}&rdquo;</p>
       <div>
-        <p className="font-medium text-primary">{author}</p>
-        <p className="text-sm text-text-muted">
+        <p className="font-medium text-primary text-sm sm:text-base">{author}</p>
+        <p className="text-xs sm:text-sm text-text-muted">
           {role} &bull; {industry}
         </p>
       </div>

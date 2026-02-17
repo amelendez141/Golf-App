@@ -32,7 +32,7 @@ export function MapFilterChips({ filters, onChange, className }: MapFilterChipsP
   };
 
   return (
-    <div className={cn('flex flex-wrap gap-2', className)}>
+    <div className={cn('flex gap-2 overflow-x-auto no-scrollbar pb-1 -mb-1 snap-x-mandatory', className)}>
       {/* Course Type Filter */}
       <FilterChip
         label="Course Type"
@@ -124,12 +124,12 @@ function FilterChip({
   onSelect,
 }: FilterChipProps) {
   return (
-    <div className="relative">
+    <div className="relative shrink-0 snap-start">
       <button
         onClick={onToggle}
         className={cn(
-          'inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all min-h-[44px]',
-          'shadow-md',
+          'inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] touch-manipulation whitespace-nowrap',
+          'shadow-md active:scale-95',
           isActive
             ? 'bg-accent text-white'
             : 'bg-card text-text-secondary hover:bg-secondary-300'
@@ -150,14 +150,14 @@ function FilterChip({
           initial={{ opacity: 0, y: -8, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.95 }}
-          className="absolute top-full left-0 mt-1 bg-card rounded-lg shadow-lg border border-primary/5 py-1 min-w-[140px] z-50"
+          className="absolute top-full left-0 mt-1 bg-card rounded-xl shadow-lg border border-primary/5 py-1.5 min-w-[160px] z-50"
         >
           {options.map((option) => (
             <button
               key={option.value}
               onClick={() => onSelect(option.value)}
               className={cn(
-                'w-full px-3 py-2 text-left text-sm hover:bg-secondary transition-colors',
+                'w-full px-4 py-3 text-left text-sm hover:bg-secondary transition-colors touch-manipulation min-h-[44px]',
                 option.value === (isActive ? value : 'all')
                   ? 'text-accent font-medium'
                   : 'text-text-secondary'

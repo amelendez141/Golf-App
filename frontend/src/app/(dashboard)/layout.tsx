@@ -21,8 +21,8 @@ export default function DashboardLayout({
       <Navbar />
       <Sidebar />
 
-      {/* Main content with page transitions */}
-      <main className="lg:pl-64 pb-20 lg:pb-0">
+      {/* Main content with page transitions - accounting for taller mobile nav */}
+      <main className="lg:pl-64 pb-[88px] lg:pb-0">
         <PageTransition className="min-h-[calc(100vh-4rem)]">
           {children}
         </PageTransition>

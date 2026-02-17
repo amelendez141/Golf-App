@@ -8,6 +8,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { ThemeProvider } from '@/components/theme';
 import { registerServiceWorker } from '@/lib/offline';
 import { OfflineIndicator } from '@/components/ui/OfflineIndicator';
+import { useAuth } from '@/lib/auth';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -32,6 +33,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
     registerServiceWorker();
   }, []);
 
+  // Refresh user data on mount if authenticated
+  const isAuthenticated = useAuth((state) => state.isAuthenticated);
+  const refreshUser = useAuth((state) => state.refreshUser);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshUser();
+    }
+    // Only run once on mount, not on every change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -46,4 +59,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </ThemeProvider>
     </QueryClientProvider>
   );
+}
+
+// Export a helper to check if user is authenticated
+export function useIsAuthenticated(): boolean {
+  return useAuth((state) => state.isAuthenticated);
 }

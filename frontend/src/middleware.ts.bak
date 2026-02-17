@@ -1,0 +1,54 @@
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+// Check if Clerk is properly configured
+// The key must exist and not be empty to enable Clerk middleware
+const isClerkConfigured = Boolean(
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.length > 0
+);
+
+// Dynamic import for Clerk middleware (only used when configured)
+let clerkMiddleware: typeof import('@clerk/nextjs/server').clerkMiddleware | null = null;
+let createRouteMatcher: typeof import('@clerk/nextjs/server').createRouteMatcher | null = null;
+
+// Public routes that don't require authentication
+const publicRoutes = [
+  '/',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/api/webhooks(.*)',
+];
+
+export async function middleware(request: NextRequest) {
+  // If Clerk is not configured, allow all requests through (demo mode)
+  if (!isClerkConfigured) {
+    return NextResponse.next();
+  }
+
+  // Dynamically import Clerk middleware when needed
+  if (!clerkMiddleware || !createRouteMatcher) {
+    const clerk = await import('@clerk/nextjs/server');
+    clerkMiddleware = clerk.clerkMiddleware;
+    createRouteMatcher = clerk.createRouteMatcher;
+  }
+
+  // Create route matcher for public routes
+  const isPublicRoute = createRouteMatcher(publicRoutes);
+
+  // Use Clerk middleware for authenticated routes
+  return clerkMiddleware(async (auth, req) => {
+    if (!isPublicRoute(req)) {
+      await auth.protect();
+    }
+  })(request, {} as any);
+}
+
+export const config = {
+  matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
+  ],
+};

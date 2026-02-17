@@ -6,6 +6,7 @@ import { TourTriggerButton } from './QuickTourModal';
 import { DemoResetButton } from './DemoResetButton';
 import { ShowcaseTriggerButton } from './ShowcaseMode';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/auth';
 
 interface DemoStats {
   users: number;
@@ -53,6 +54,7 @@ function AnimatedNumber({ value, duration = 1500 }: { value: number; duration?: 
 }
 
 export function DemoBanner() {
+  const { isAuthenticated } = useAuth();
   const [stats, setStats] = useState<DemoStats | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -82,6 +84,12 @@ export function DemoBanner() {
   const handleToggleExpand = useCallback(() => {
     setIsExpanded((prev) => !prev);
   }, []);
+
+  // Hide banner when user is authenticated with local auth
+  // Note: Must be after all hooks to comply with Rules of Hooks
+  if (isAuthenticated) {
+    return null;
+  }
 
   if (!isVisible) return null;
 

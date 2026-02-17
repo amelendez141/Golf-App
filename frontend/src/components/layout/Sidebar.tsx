@@ -25,7 +25,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:pt-16 lg:border-r lg:border-primary/5 lg:bg-card">
+    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:top-16 lg:bottom-0 lg:left-0 lg:border-r lg:border-primary/5 lg:bg-card">
       <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
         <nav className="flex-1 px-3 space-y-1">
           {NAV_LINKS.map((link) => {

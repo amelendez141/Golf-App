@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, DM_Sans, JetBrains_Mono } from 'next/font/google';
 import { Providers } from './providers';
 import '@/styles/globals.css';
@@ -21,6 +21,18 @@ const jetbrains = JetBrains_Mono({
   variable: '--font-jetbrains',
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F5F0E8' },
+    { media: '(prefers-color-scheme: dark)', color: '#1B3A2D' },
+  ],
+};
+
 export const metadata: Metadata = {
   title: 'LinkUp Golf - Find Your Foursome',
   description:
@@ -28,9 +40,17 @@ export const metadata: Metadata = {
   keywords: ['golf', 'tee times', 'networking', 'professionals', 'golf partners'],
   authors: [{ name: 'LinkUp Golf' }],
   manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/icons/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/icons/icon.svg', type: 'image/svg+xml' },
+    ],
+  },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'LinkUp Golf',
   },
   formatDetection: {

@@ -36,13 +36,14 @@ export function FeedFilters({ className }: FeedFiltersProps) {
 
   return (
     <div className={cn('space-y-3', className)}>
-      {/* Quick filters row */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+      {/* Quick filters row - horizontal scroll on mobile */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar -mx-1 px-1 snap-x-mandatory">
         <Button
           variant={isExpanded ? 'primary' : 'secondary'}
-          size="sm"
+          size="md"
           onClick={() => setIsExpanded(!isExpanded)}
           leftIcon={<FilterIcon className="h-4 w-4" />}
+          className="shrink-0 snap-start"
         >
           Filters
           {hasActiveFilters && (
@@ -52,13 +53,13 @@ export function FeedFilters({ className }: FeedFiltersProps) {
           )}
         </Button>
 
-        {/* Quick industry filters */}
+        {/* Quick industry filters - larger touch targets */}
         {INDUSTRIES.slice(0, 4).map((industry) => (
           <button
             key={industry.id}
             onClick={() => selectIndustry(industry.id)}
             className={cn(
-              'shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+              'shrink-0 px-4 py-2.5 rounded-full text-sm font-medium transition-all touch-manipulation snap-start min-h-[44px] active:scale-95',
               filters.industry === industry.id
                 ? 'bg-primary text-white shadow-md'
                 : 'bg-secondary-200 text-text-secondary hover:bg-secondary-300'
@@ -71,7 +72,7 @@ export function FeedFilters({ className }: FeedFiltersProps) {
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="shrink-0 text-xs text-text-muted hover:text-primary transition-colors"
+            className="shrink-0 px-3 py-2 text-sm text-text-muted hover:text-primary transition-colors touch-manipulation min-h-[44px] snap-start"
           >
             Clear all
           </button>
@@ -88,17 +89,17 @@ export function FeedFilters({ className }: FeedFiltersProps) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="bg-card rounded-xl border border-primary/5 p-4 space-y-4 shadow-sm">
+            <div className="bg-card rounded-xl border border-primary/5 p-4 space-y-5 shadow-sm">
               {/* Industries */}
               <div>
-                <h4 className="text-sm font-medium text-primary mb-2">Industries</h4>
+                <h4 className="text-sm font-medium text-primary mb-3">Industries</h4>
                 <div className="flex flex-wrap gap-2">
                   {INDUSTRIES.map((industry) => (
                     <button
                       key={industry.id}
                       onClick={() => selectIndustry(industry.id)}
                       className={cn(
-                        'px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                        'px-4 py-2.5 rounded-full text-sm font-medium transition-all touch-manipulation min-h-[44px] active:scale-95',
                         filters.industry === industry.id
                           ? `${industry.bgClass} shadow-sm`
                           : 'bg-secondary-200 text-text-secondary hover:bg-secondary-300'
@@ -112,14 +113,14 @@ export function FeedFilters({ className }: FeedFiltersProps) {
 
               {/* Skill Levels */}
               <div>
-                <h4 className="text-sm font-medium text-primary mb-2">Skill Level</h4>
+                <h4 className="text-sm font-medium text-primary mb-3">Skill Level</h4>
                 <div className="flex flex-wrap gap-2">
                   {SKILL_LEVELS.map((skill) => (
                     <button
                       key={skill.id}
                       onClick={() => selectSkillLevel(skill.id)}
                       className={cn(
-                        'px-3 py-1.5 rounded-full text-xs font-medium transition-all',
+                        'px-4 py-2.5 rounded-full text-sm font-medium transition-all touch-manipulation min-h-[44px] active:scale-95',
                         filters.skillLevel === skill.id
                           ? `${skill.bgClass} shadow-sm`
                           : 'bg-secondary-200 text-text-secondary hover:bg-secondary-300'
@@ -132,12 +133,12 @@ export function FeedFilters({ className }: FeedFiltersProps) {
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end gap-2 pt-2 border-t border-primary/5">
-                <Button variant="ghost" size="sm" onClick={() => setIsExpanded(false)}>
+              <div className="flex justify-end gap-3 pt-3 border-t border-primary/5">
+                <Button variant="ghost" size="md" onClick={() => setIsExpanded(false)}>
                   Close
                 </Button>
                 {hasActiveFilters && (
-                  <Button variant="secondary" size="sm" onClick={clearFilters}>
+                  <Button variant="secondary" size="md" onClick={clearFilters}>
                     Clear All
                   </Button>
                 )}

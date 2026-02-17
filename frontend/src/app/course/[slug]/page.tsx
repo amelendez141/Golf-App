@@ -83,10 +83,12 @@ export default function CourseDetailPage({ params }: PageProps) {
               <Badge variant="secondary" size="lg">
                 {COURSE_TYPES[course.courseType]}
               </Badge>
-              <Badge variant="secondary" size="lg">
-                {PRICE_LEVEL_LABELS[course.priceLevel]}
-              </Badge>
-              {course.rating > 0 && (
+              {course.greenFee && (
+                <Badge variant="secondary" size="lg">
+                  ${(course.greenFee / 100).toFixed(0)}
+                </Badge>
+              )}
+              {course.rating && course.rating > 0 && (
                 <Badge variant="accent" size="lg" className="flex items-center gap-1">
                   <StarIcon className="h-4 w-4" />
                   {course.rating.toFixed(1)}
@@ -112,12 +114,12 @@ export default function CourseDetailPage({ params }: PageProps) {
                   <p className="text-sm text-text-muted">Holes</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-primary">{course.par}</p>
+                  <p className="text-3xl font-bold text-primary">{course.par ?? '-'}</p>
                   <p className="text-sm text-text-muted">Par</p>
                 </div>
                 <div>
                   <p className="text-3xl font-bold text-primary">
-                    {course.yardage.toLocaleString()}
+                    {course.yardage?.toLocaleString() ?? '-'}
                   </p>
                   <p className="text-sm text-text-muted">Yards</p>
                 </div>
@@ -240,10 +242,10 @@ export default function CourseDetailPage({ params }: PageProps) {
             </Card>
 
             {/* Reviews Summary */}
-            {course.reviewCount > 0 && (
+            {course.rating && course.rating > 0 && (
               <Card>
                 <h3 className="font-serif text-lg font-semibold text-primary mb-4">
-                  Reviews
+                  Course Rating
                 </h3>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="text-4xl font-bold text-primary">
@@ -256,16 +258,13 @@ export default function CourseDetailPage({ params }: PageProps) {
                           key={star}
                           className={cn(
                             'h-5 w-5',
-                            star <= Math.round(course.rating)
+                            star <= Math.round(course.rating ?? 0)
                               ? 'text-accent'
                               : 'text-secondary-300'
                           )}
                         />
                       ))}
                     </div>
-                    <p className="text-sm text-text-muted">
-                      {course.reviewCount} reviews
-                    </p>
                   </div>
                 </div>
               </Card>

@@ -79,7 +79,23 @@ const demoPendingRequests = [
   },
 ];
 
-const demoNotes = [
+const demoNotes: Array<{
+  id: string;
+  aboutUser: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl: string | null;
+    company: string;
+    jobTitle: string;
+    industry: string;
+  };
+  content: string;
+  tags: string[];
+  courseName?: string;
+  roundDate?: string;
+  createdAt: string;
+}> = [
   {
     id: 'n1',
     aboutUser: {
@@ -135,19 +151,26 @@ export default function ConnectionsPage() {
   };
 
   const handleAddNote = (note: { aboutUserId: string; content: string; tags: string[] }) => {
-    const aboutUser = connections.find((c) => c.user.id === note.aboutUserId)?.user;
-    if (!aboutUser) return;
+    const connection = connections.find((c) => c.user.id === note.aboutUserId);
+    if (!connection) return;
 
-    setNotes((prev) => [
-      {
-        id: `n${Date.now()}`,
-        aboutUser,
-        content: note.content,
-        tags: note.tags,
-        createdAt: new Date().toISOString(),
+    const newNote: typeof demoNotes[0] = {
+      id: `n${Date.now()}`,
+      aboutUser: {
+        id: connection.user.id,
+        firstName: connection.user.firstName,
+        lastName: connection.user.lastName,
+        avatarUrl: connection.user.avatarUrl ?? null,
+        company: connection.user.company ?? '',
+        jobTitle: connection.user.jobTitle ?? '',
+        industry: connection.user.industry ?? '',
       },
-      ...prev,
-    ]);
+      content: note.content,
+      tags: note.tags,
+      createdAt: new Date().toISOString(),
+    };
+
+    setNotes((prev) => [newNote, ...prev]);
     setAddingNoteFor(null);
   };
 

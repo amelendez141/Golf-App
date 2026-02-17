@@ -27,11 +27,15 @@ export function CourseBottomSheet({ marker, onClose }: CourseBottomSheetProps) {
   }, [marker]);
 
   const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.velocity.y > 300 || info.offset.y > 100) {
+    // More forgiving thresholds for mobile swipe
+    const swipeThreshold = 50;
+    const velocityThreshold = 200;
+
+    if (info.velocity.y > velocityThreshold || info.offset.y > swipeThreshold * 2) {
       onClose();
-    } else if (info.velocity.y < -300 || info.offset.y < -100) {
+    } else if (info.velocity.y < -velocityThreshold || info.offset.y < -swipeThreshold) {
       setIsExpanded(true);
-    } else {
+    } else if (isExpanded && info.offset.y > swipeThreshold) {
       setIsExpanded(false);
     }
   };
@@ -47,9 +51,9 @@ export function CourseBottomSheet({ marker, onClose }: CourseBottomSheetProps) {
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={{ opacity: isExpanded ? 0.4 : 0.2 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+            className="fixed inset-0 bg-black z-40 lg:hidden"
             onClick={onClose}
           />
 
@@ -57,23 +61,23 @@ export function CourseBottomSheet({ marker, onClose }: CourseBottomSheetProps) {
           <motion.div
             ref={sheetRef}
             initial={{ y: '100%' }}
-            animate={{ y: isExpanded ? '10%' : '50%' }}
+            animate={{ y: isExpanded ? '15%' : '55%' }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             drag="y"
             dragControls={dragControls}
             dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={0.2}
+            dragElastic={0.15}
             onDragEnd={handleDragEnd}
-            className="fixed inset-x-0 bottom-0 z-50 lg:hidden"
+            className="fixed inset-x-0 bottom-0 z-50 lg:hidden touch-pan-y"
           >
-            <div className="bg-card rounded-t-2xl shadow-xl overflow-hidden">
+            <div className="bg-card rounded-t-3xl shadow-xl overflow-hidden">
               {/* Handle - larger touch target for one-handed operation */}
               <div
-                className="py-4 cursor-grab active:cursor-grabbing min-h-[44px] flex items-center justify-center"
+                className="py-5 cursor-grab active:cursor-grabbing min-h-[52px] flex items-center justify-center touch-manipulation"
                 onPointerDown={(e) => dragControls.start(e)}
               >
-                <div className="w-16 h-1.5 rounded-full bg-primary/30 mx-auto" />
+                <div className="w-12 h-1.5 rounded-full bg-primary/30 mx-auto" />
               </div>
 
               {/* Content */}
@@ -176,9 +180,9 @@ export function CourseBottomSheet({ marker, onClose }: CourseBottomSheetProps) {
                 </AnimatePresence>
 
                 {/* Action */}
-                <div className="py-4 border-t border-primary/5">
+                <div className="py-4 border-t border-primary/5 pb-safe">
                   <Link href={`/course/${course.slug}`}>
-                    <Button variant="primary" fullWidth>
+                    <Button variant="primary" fullWidth size="xl" className="touch-manipulation">
                       View Tee Times
                     </Button>
                   </Link>

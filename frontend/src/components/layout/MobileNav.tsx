@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { MOBILE_NAV_LINKS } from '@/lib/constants';
 
@@ -25,8 +26,9 @@ export function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-primary/5 bg-card/95 backdrop-blur-lg safe-bottom lg:hidden">
-      <div className="flex items-center justify-around h-16">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-primary/5 bg-card/95 backdrop-blur-lg lg:hidden safe-left safe-right">
+      {/* Safe area spacer for bottom */}
+      <div className="flex items-center justify-around h-[72px] pb-safe">
         {MOBILE_NAV_LINKS.map((link) => {
           const isActive = link.href === '/post'
             ? false
@@ -40,20 +42,37 @@ export function MobileNav() {
               href={link.href}
               data-tour={tourAttribute}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors',
+                'relative flex flex-col items-center justify-center rounded-xl transition-all duration-200 touch-manipulation select-none-mobile',
                 isPostButton
-                  ? 'bg-accent text-white rounded-full h-12 w-12 -mt-4 shadow-button'
-                  : isActive
-                  ? 'text-primary'
-                  : 'text-text-muted hover:text-primary'
+                  ? 'bg-accent text-white rounded-full h-14 w-14 -mt-5 shadow-button active:scale-95 active:shadow-none'
+                  : 'min-h-[56px] min-w-[64px] px-3 py-2 active:bg-primary/5',
+                isActive && !isPostButton && 'text-primary',
+                !isActive && !isPostButton && 'text-text-muted'
               )}
             >
+              {/* Active indicator */}
+              {isActive && !isPostButton && (
+                <motion.div
+                  layoutId="mobile-nav-indicator"
+                  className="absolute -top-0.5 left-1/2 -translate-x-1/2 h-1 w-8 bg-accent rounded-full"
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              )}
               <MobileNavIcon
                 name={link.icon}
-                className={cn('h-5 w-5', isPostButton && 'h-6 w-6')}
+                className={cn(
+                  'h-6 w-6 transition-transform',
+                  isPostButton && 'h-7 w-7',
+                  isActive && !isPostButton && 'scale-110'
+                )}
               />
               {!isPostButton && (
-                <span className="text-[10px] font-medium">{link.label}</span>
+                <span className={cn(
+                  'text-[11px] font-medium mt-0.5 transition-colors',
+                  isActive ? 'text-primary' : 'text-text-muted'
+                )}>
+                  {link.label}
+                </span>
               )}
             </Link>
           );

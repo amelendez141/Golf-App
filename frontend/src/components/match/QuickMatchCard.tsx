@@ -105,13 +105,13 @@ export function QuickMatchCard({ className }: QuickMatchCardProps) {
       padding="none"
     >
       {/* Header */}
-      <div className="p-4 pb-3">
+      <div className="p-3 sm:p-4 pb-3">
         <div className="flex items-center gap-3 mb-3">
-          <div className="h-10 w-10 rounded-xl bg-accent/10 flex items-center justify-center">
-            <LightningIcon className="h-5 w-5 text-accent" />
+          <div className="h-11 w-11 sm:h-10 sm:w-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+            <LightningIcon className="h-6 w-6 sm:h-5 sm:w-5 text-accent" />
           </div>
           <div>
-            <h3 className="font-serif font-semibold text-primary">Quick Match</h3>
+            <h3 className="font-serif font-semibold text-primary text-base sm:text-base">Quick Match</h3>
             <div className="flex items-center gap-1 text-sm text-text-muted">
               <LocationPinIcon className="h-3.5 w-3.5" />
               {isLoadingLocation ? (
@@ -125,14 +125,14 @@ export function QuickMatchCard({ className }: QuickMatchCardProps) {
           </div>
         </div>
 
-        {/* Time filter chips */}
-        <div className="flex gap-2">
+        {/* Time filter chips - larger touch targets */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
           {(['today', 'tomorrow', 'this-week'] as TimeFilter[]).map((filter) => (
             <button
               key={filter}
               onClick={() => setTimeFilter(filter)}
               className={cn(
-                'px-3 py-1.5 rounded-full text-sm font-medium transition-all min-h-[36px]',
+                'px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] shrink-0 touch-manipulation active:scale-95',
                 timeFilter === filter
                   ? 'bg-accent text-white'
                   : 'bg-secondary hover:bg-secondary-300 text-text-secondary'
@@ -147,28 +147,28 @@ export function QuickMatchCard({ className }: QuickMatchCardProps) {
       </div>
 
       {/* Results */}
-      <div className="px-4 pb-4">
+      <div className="px-3 sm:px-4 pb-3 sm:pb-4">
         {isLoading || isLoadingLocation ? (
           <div className="space-y-2">
-            <Skeleton className="h-12 w-full rounded-lg" />
-            <Skeleton className="h-12 w-full rounded-lg" />
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
           </div>
         ) : matchCount > 0 ? (
           <motion.div
             initial={false}
-            animate={{ height: isExpanded ? 'auto' : '64px' }}
+            animate={{ height: isExpanded ? 'auto' : '68px' }}
             className="overflow-hidden"
           >
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="w-full p-3 rounded-xl bg-success/10 hover:bg-success/15 transition-colors text-left"
+              className="w-full p-4 rounded-xl bg-success/10 hover:bg-success/15 transition-colors text-left touch-manipulation active:bg-success/20 min-h-[52px]"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <GolfIcon className="h-6 w-6 text-success" />
+                  <GolfIcon className="h-7 w-7 text-success" />
                   <div>
                     <span className="text-lg font-semibold text-success">{matchCount}</span>
-                    <span className="text-text-secondary ml-1.5">
+                    <span className="text-text-secondary ml-1.5 text-sm sm:text-base">
                       {matchCount === 1 ? 'match' : 'matches'} available
                     </span>
                   </div>
@@ -177,7 +177,7 @@ export function QuickMatchCard({ className }: QuickMatchCardProps) {
                   animate={{ rotate: isExpanded ? 180 : 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <ChevronIcon className="h-5 w-5 text-text-muted" />
+                  <ChevronIcon className="h-6 w-6 text-text-muted" />
                 </motion.div>
               </div>
             </button>
@@ -193,13 +193,13 @@ export function QuickMatchCard({ className }: QuickMatchCardProps) {
                 >
                   {data.data.slice(0, 3).map((teeTime) => (
                     <Link key={teeTime.id} href={`/tee-time/${teeTime.id}`}>
-                      <div className="p-3 rounded-lg bg-secondary hover:bg-secondary-300 transition-colors">
+                      <div className="p-4 rounded-xl bg-secondary hover:bg-secondary-300 transition-colors touch-manipulation active:scale-[0.99] min-h-[52px]">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-primary text-sm line-clamp-1">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-primary text-sm sm:text-base line-clamp-1">
                               {teeTime.course.name}
                             </p>
-                            <p className="text-xs text-text-muted">
+                            <p className="text-xs sm:text-sm text-text-muted">
                               {new Date(teeTime.dateTime).toLocaleTimeString([], {
                                 hour: 'numeric',
                                 minute: '2-digit',
@@ -208,7 +208,7 @@ export function QuickMatchCard({ className }: QuickMatchCardProps) {
                               {teeTime.availableSlots} {teeTime.availableSlots === 1 ? 'spot' : 'spots'}
                             </p>
                           </div>
-                          <ArrowRightIcon className="h-4 w-4 text-text-muted" />
+                          <ArrowRightIcon className="h-5 w-5 text-text-muted shrink-0 ml-2" />
                         </div>
                       </div>
                     </Link>
@@ -218,7 +218,7 @@ export function QuickMatchCard({ className }: QuickMatchCardProps) {
             </AnimatePresence>
           </motion.div>
         ) : (
-          <div className="p-3 rounded-xl bg-secondary text-center">
+          <div className="p-4 rounded-xl bg-secondary text-center">
             <p className="text-text-muted text-sm">No matches for {timeFilter.replace('-', ' ')}</p>
             <p className="text-xs text-text-muted mt-1">Try expanding your search</p>
           </div>
@@ -229,7 +229,7 @@ export function QuickMatchCard({ className }: QuickMatchCardProps) {
           href={`/feed${location ? `?lat=${location.latitude}&lng=${location.longitude}` : ''}`}
           className="block mt-3"
         >
-          <Button variant="outline" fullWidth size="sm">
+          <Button variant="outline" fullWidth size="md" className="touch-manipulation">
             Browse all tee times
             <ArrowRightIcon className="h-4 w-4 ml-1" />
           </Button>

@@ -85,23 +85,23 @@ export default function FeedPage() {
   const isEmpty = !isLoading && teeTimes.length === 0;
 
   return (
-    <div className="py-6">
+    <div className="py-4 sm:py-6 pb-24 sm:pb-6">
       <Container>
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="font-serif text-2xl md:text-3xl font-bold text-primary mb-2">
+        {/* Header - Better mobile typography */}
+        <div className="mb-4 sm:mb-6">
+          <h1 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-primary mb-1 sm:mb-2">
             Tee Times
           </h1>
-          <p className="text-text-secondary">
+          <p className="text-sm sm:text-base text-text-secondary">
             Find open tee times and join groups of like-minded professionals.
           </p>
         </div>
 
         {/* Quick Match */}
-        <QuickMatchCard className="mb-6" />
+        <QuickMatchCard className="mb-4 sm:mb-6" />
 
         {/* Filters */}
-        <FeedFilters className="mb-6" />
+        <FeedFilters className="mb-4 sm:mb-6" />
 
         {/* Content */}
         {isLoading ? (
@@ -129,7 +129,7 @@ export default function FeedPage() {
               particleCount={40}
             />
 
-            <StaggerList className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <StaggerList className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {teeTimes.map((teeTime) => (
                 <StaggerItem key={teeTime.id}>
                   <TeeTimeCard
@@ -189,3 +189,4 @@ function LoadingSpinner() {
     </svg>
   );
 }
+// Force rebuild Tue Feb 17 16:34:56 EST 2026

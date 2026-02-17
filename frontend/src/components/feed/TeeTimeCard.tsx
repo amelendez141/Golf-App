@@ -61,21 +61,21 @@ export function TeeTimeCard({
   const distance = teeTime.course.distance;
 
   return (
-    <Link href={`/tee-time/${teeTime.id}`}>
+    <Link href={`/tee-time/${teeTime.id}`} className="block touch-manipulation">
       <Card
         variant="interactive"
         padding="none"
-        className={cn('overflow-hidden', className)}
+        className={cn('overflow-hidden active:scale-[0.99] transition-transform', className)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Weather Strip - Top */}
         {weather && (
-          <div className="flex items-center justify-between px-4 py-2 bg-accent/5 border-b border-primary/5">
+          <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-accent/5 border-b border-primary/5">
             <div className="flex items-center gap-2">
               <WeatherIcon icon={weather.icon} className="h-5 w-5 text-accent" />
               <span className="text-sm font-medium text-primary">{weather.temperature}°F</span>
-              <span className="text-xs text-text-muted">{weather.conditions}</span>
+              <span className="text-xs text-text-muted hidden xs:inline">{weather.conditions}</span>
             </div>
             {weather.playabilityScore >= 7 && (
               <Badge variant="success" size="sm">Great for golf</Badge>
@@ -83,8 +83,8 @@ export function TeeTimeCard({
           </div>
         )}
 
-        {/* Course Image Header */}
-        <div className="relative h-32 overflow-hidden">
+        {/* Course Image Header - Taller on mobile for better visuals */}
+        <div className="relative h-36 sm:h-32 overflow-hidden">
           {teeTime.course.imageUrl ? (
             <Image
               src={teeTime.course.imageUrl}
@@ -94,6 +94,7 @@ export function TeeTimeCard({
                 'object-cover transition-transform duration-500',
                 isHovered && 'scale-105'
               )}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
@@ -108,7 +109,7 @@ export function TeeTimeCard({
           <div className="absolute bottom-3 left-3 right-3">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-serif font-semibold text-white line-clamp-1">
+                <h3 className="text-base sm:text-base font-serif font-semibold text-white line-clamp-1">
                   {teeTime.course.name}
                 </h3>
                 <p className="text-xs text-white/80">
@@ -116,7 +117,7 @@ export function TeeTimeCard({
                 </p>
               </div>
               {distance !== undefined && distance !== null && (
-                <span className="shrink-0 text-xs text-white/80 bg-black/30 px-2 py-0.5 rounded">
+                <span className="shrink-0 text-xs text-white/80 bg-black/30 px-2 py-1 rounded-md">
                   {distance.toFixed(1)} mi
                 </span>
               )}
@@ -124,13 +125,13 @@ export function TeeTimeCard({
           </div>
         </div>
 
-        {/* Card Body - Redesigned */}
-        <div className="p-4 space-y-3">
+        {/* Card Body - Better mobile spacing */}
+        <div className="p-3 sm:p-4 space-y-3">
           {/* Date/Time Row */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-accent" />
-              <span className="font-medium text-primary">
+              <CalendarIcon className="h-5 w-5 text-accent" />
+              <span className="font-medium text-primary text-base">
                 {formatSmartDate(teeTime.dateTime)}
               </span>
             </div>
@@ -153,38 +154,40 @@ export function TeeTimeCard({
             )}
           </p>
 
-          {/* Preferences - Compact */}
-          <div className="flex items-center justify-between">
-            <div className="flex flex-wrap gap-1.5">
+          {/* Preferences - Compact with horizontal scroll on mobile */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1">
               {teeTime.industryPreference?.slice(0, 2).map((industry) => (
-                <IndustryBadge key={industry} industry={industry} size="sm" />
+                <IndustryBadge key={industry} industry={industry} size="sm" className="shrink-0" />
               ))}
               {teeTime.skillPreference?.slice(0, 1).map((skill) => (
-                <SkillBadge key={skill} skillLevel={skill} size="sm" />
+                <SkillBadge key={skill} skillLevel={skill} size="sm" className="shrink-0" />
               ))}
             </div>
             {/* Price indicator (if available) */}
             {teeTime.course.greenFee && (
-              <span className="text-xs text-text-muted">
+              <span className="text-xs text-text-muted shrink-0">
                 {'$'.repeat(Math.min(4, Math.ceil(teeTime.course.greenFee / 5000)))}
               </span>
             )}
           </div>
 
-          {/* Single CTA Button */}
+          {/* Single CTA Button - Larger touch target */}
           {hasOpenSlots && onJoin && (
             <Button
               variant="accent"
               fullWidth
+              size="lg"
               onClick={handleJoinClick}
               isLoading={isJoining}
+              className="mt-1"
             >
               Join This Group
             </Button>
           )}
 
           {!hasOpenSlots && (
-            <Button variant="secondary" fullWidth disabled>
+            <Button variant="secondary" fullWidth size="lg" disabled className="mt-1">
               Group Full
             </Button>
           )}

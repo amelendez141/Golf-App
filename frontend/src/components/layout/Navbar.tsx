@@ -1,25 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 import { Container } from './Container';
 import { NAV_LINKS } from '@/lib/constants';
 import { ThemeToggle } from '@/components/theme';
+import { useAuth } from '@/lib/auth';
+import { Avatar } from '@/components/ui/Avatar';
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setIsUserMenuOpen(false);
+    router.push('/');
+  };
+
+  const userInitials = user
+    ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() || user.email[0].toUpperCase()
+    : '';
 
   return (
     <nav className="sticky top-0 z-40 border-b border-primary/5 bg-card/80 backdrop-blur-lg">
       <Container>
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href={isAuthenticated ? '/feed' : '/'} className="flex items-center gap-2">
             <GolfIcon className="h-8 w-8 text-primary" />
             <span className="font-serif text-xl font-semibold text-primary">
               LinkUp
@@ -57,14 +85,92 @@ export function Navbar() {
           {/* Right side */}
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Link href="/sign-in">
-              <Button variant="ghost" size="sm">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/sign-up" className="hidden sm:block">
-              <Button size="sm">Get Started</Button>
-            </Link>
+
+            {isAuthenticated && user ? (
+              // Authenticated user menu
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-primary/5 transition-colors"
+                >
+                  <Avatar
+                    src={user.avatarUrl}
+                    alt={`${user.firstName} ${user.lastName}`}
+                    fallback={userInitials}
+                    size="sm"
+                  />
+                  <span className="hidden sm:block text-sm font-medium text-primary max-w-[120px] truncate">
+                    {user.firstName || user.email.split('@')[0]}
+                  </span>
+                  <ChevronDownIcon className="h-4 w-4 text-text-muted" />
+                </button>
+
+                <AnimatePresence>
+                  {isUserMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-56 bg-card rounded-xl shadow-lg border border-primary/10 py-2 z-50"
+                    >
+                      {/* User info */}
+                      <div className="px-4 py-3 border-b border-primary/10">
+                        <p className="text-sm font-medium text-primary truncate">
+                          {user.firstName} {user.lastName}
+                        </p>
+                        <p className="text-xs text-text-muted truncate">
+                          {user.email}
+                        </p>
+                      </div>
+
+                      {/* Menu items */}
+                      <div className="py-1">
+                        <Link
+                          href="/profile"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-primary/5 hover:text-primary transition-colors"
+                        >
+                          <UserIcon className="h-4 w-4" />
+                          Profile
+                        </Link>
+                        <Link
+                          href="/settings"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-primary/5 hover:text-primary transition-colors"
+                        >
+                          <SettingsIcon className="h-4 w-4" />
+                          Settings
+                        </Link>
+                      </div>
+
+                      {/* Logout */}
+                      <div className="pt-1 border-t border-primary/10">
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-error hover:bg-error/5 transition-colors"
+                        >
+                          <LogoutIcon className="h-4 w-4" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              // Non-authenticated buttons
+              <>
+                <Link href="/sign-in">
+                  <Button variant="ghost" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/sign-up" className="hidden sm:block">
+                  <Button size="sm">Get Started</Button>
+                </Link>
+              </>
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -81,37 +187,78 @@ export function Navbar() {
       {/* Mobile Navigation */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden border-t border-primary/5 bg-card"
-          >
-            <Container>
-              <div className="py-4 space-y-1">
-                {NAV_LINKS.map((link) => {
-                  const isActive = pathname === link.href;
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={cn(
-                        'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
-                        isActive
-                          ? 'bg-primary/5 text-primary'
-                          : 'text-text-secondary hover:bg-primary/5 hover:text-primary'
-                      )}
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="md:hidden fixed inset-0 bg-black/20 z-30"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              className="md:hidden absolute top-full left-0 right-0 border-t border-primary/5 bg-card shadow-lg z-40"
+            >
+              <Container>
+                <div className="py-3 space-y-1">
+                  {NAV_LINKS.map((link, index) => {
+                    const isActive = pathname === link.href;
+                    return (
+                      <motion.div
+                        key={link.href}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <Link
+                          href={link.href}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={cn(
+                            'flex items-center gap-3 px-4 py-4 rounded-xl text-base font-medium transition-all touch-manipulation',
+                            'min-h-[52px] active:scale-[0.98] active:bg-primary/10',
+                            isActive
+                              ? 'bg-primary/5 text-primary'
+                              : 'text-text-secondary hover:bg-primary/5 hover:text-primary'
+                          )}
+                        >
+                          <NavIcon name={link.icon} className="h-6 w-6" />
+                          {link.label}
+                          {isActive && (
+                            <div className="ml-auto h-2 w-2 rounded-full bg-accent" />
+                          )}
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+
+                  {/* Mobile logout option when authenticated */}
+                  {isAuthenticated && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: NAV_LINKS.length * 0.05 }}
                     >
-                      <NavIcon name={link.icon} className="h-5 w-5" />
-                      {link.label}
-                    </Link>
-                  );
-                })}
-              </div>
-            </Container>
-          </motion.div>
+                      <button
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className="flex items-center gap-3 w-full px-4 py-4 rounded-xl text-base font-medium text-error hover:bg-error/5 transition-all touch-manipulation min-h-[52px]"
+                      >
+                        <LogoutIcon className="h-6 w-6" />
+                        Sign Out
+                      </button>
+                    </motion.div>
+                  )}
+                </div>
+              </Container>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </nav>
@@ -131,6 +278,39 @@ function MenuIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+    </svg>
+  );
+}
+
+function UserIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+    </svg>
+  );
+}
+
+function SettingsIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  );
+}
+
+function LogoutIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
     </svg>
   );
 }
