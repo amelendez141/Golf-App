@@ -197,6 +197,8 @@ export const teeTimeRepository = {
         where: { id: teeTime.id },
         include: teeTimeInclude,
       }) as Promise<TeeTimeWithRelations>;
+    }, {
+      timeout: 30000, // 30 seconds for Neon cold start
     });
   },
 
@@ -314,6 +316,7 @@ export const teeTimeRepository = {
       }) as Promise<TeeTimeSlot>;
     }, {
       isolationLevel: 'Serializable',
+      timeout: 30000, // 30 seconds for Neon cold start
     });
   },
 
@@ -351,6 +354,8 @@ export const teeTimeRepository = {
           data: { status: 'OPEN' },
         });
       }
+    }, {
+      timeout: 30000, // 30 seconds for Neon cold start
     });
   },
 
