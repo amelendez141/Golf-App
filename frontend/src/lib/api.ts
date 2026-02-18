@@ -172,22 +172,24 @@ class ApiClient {
 
   // Courses
   async getCourses(
-    query?: string,
-    latitude?: number,
-    longitude?: number,
-    radius: number = 50,
-    courseType?: string,
-    cursor?: string,
-    limit: number = 20
+    options: {
+      query?: string;
+      latitude?: number;
+      longitude?: number;
+      radius?: number;
+      courseType?: string;
+      cursor?: string;
+      limit?: number;
+    } = {}
   ): Promise<ApiResponse<Course[]>> {
     const params = new URLSearchParams();
-    if (query) params.set('query', query);
-    if (latitude !== undefined) params.set('latitude', latitude.toString());
-    if (longitude !== undefined) params.set('longitude', longitude.toString());
-    params.set('radius', radius.toString());
-    if (courseType) params.set('courseType', courseType);
-    if (cursor) params.set('cursor', cursor);
-    params.set('limit', limit.toString());
+    if (options.query) params.set('query', options.query);
+    if (options.latitude !== undefined) params.set('latitude', options.latitude.toString());
+    if (options.longitude !== undefined) params.set('longitude', options.longitude.toString());
+    if (options.radius) params.set('radius', options.radius.toString());
+    if (options.courseType) params.set('courseType', options.courseType);
+    if (options.cursor) params.set('cursor', options.cursor);
+    params.set('limit', (options.limit || 20).toString());
 
     return this.request<ApiResponse<Course[]>>(`/api/courses?${params.toString()}`);
   }
