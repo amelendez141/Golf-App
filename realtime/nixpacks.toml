@@ -17,4 +17,4 @@ PRISMA_CLI_BINARY_TARGETS = "linux-musl-openssl-3.0.x"
 NPM_CONFIG_PRODUCTION = "false"
 
 [start]
-cmd = "npx prisma migrate deploy && node dist/index.js"
+cmd = "node dist/index.js"

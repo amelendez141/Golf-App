@@ -5,16 +5,60 @@ import { metrics } from '../utils/metrics.js';
 
 const logger = createLogger('email-notifications');
 
-// Create reusable transporter
-const transporter = nodemailer.createTransport({
-  host: env.SMTP_HOST,
-  port: env.SMTP_PORT,
-  secure: env.SMTP_PORT === 465,
-  auth: {
-    user: env.SMTP_USER,
-    pass: env.SMTP_PASS,
-  },
-});
+// Check if email is properly configured
+const isEmailConfigured = (): boolean => {
+  if (!env.EMAIL_ENABLED) {
+    return false;
+  }
+
+  // Check for Resend API key
+  if (env.RESEND_API_KEY) {
+    return true;
+  }
+
+  // Check for SMTP configuration
+  if (env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS) {
+    return true;
+  }
+
+  return false;
+};
+
+// Create transporter based on configuration
+const createTransporter = () => {
+  if (!isEmailConfigured()) {
+    logger.warn('Email not configured - notifications will be logged only');
+    return null;
+  }
+
+  // Use Resend if API key is provided
+  if (env.RESEND_API_KEY) {
+    logger.info('Using Resend for email delivery');
+    return nodemailer.createTransport({
+      host: 'smtp.resend.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: 'resend',
+        pass: env.RESEND_API_KEY,
+      },
+    });
+  }
+
+  // Use SMTP configuration
+  logger.info({ host: env.SMTP_HOST, port: env.SMTP_PORT }, 'Using SMTP for email delivery');
+  return nodemailer.createTransport({
+    host: env.SMTP_HOST,
+    port: env.SMTP_PORT,
+    secure: env.SMTP_PORT === 465,
+    auth: {
+      user: env.SMTP_USER,
+      pass: env.SMTP_PASS,
+    },
+  });
+};
+
+const transporter = createTransporter();
 
 export interface EmailOptions {
   to: string;
@@ -25,6 +69,15 @@ export interface EmailOptions {
 }
 
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
+  // If email is not configured, just log
+  if (!transporter) {
+    logger.info(
+      { to: options.to, subject: options.subject },
+      'Email would be sent (not configured)'
+    );
+    return true;
+  }
+
   try {
     const info = await transporter.sendMail({
       from: env.SMTP_FROM,
@@ -66,8 +119,13 @@ export async function sendBulkEmail(
   return { success, failed };
 }
 
-// Verify SMTP connection
+// Verify email connection
 export async function verifyEmailConnection(): Promise<boolean> {
+  if (!transporter) {
+    logger.warn('Email not configured - skipping verification');
+    return false;
+  }
+
   try {
     await transporter.verify();
     logger.info('Email connection verified');
@@ -77,3 +135,9 @@ export async function verifyEmailConnection(): Promise<boolean> {
     return false;
   }
 }
+
+// Export configuration status
+export const emailStatus = {
+  isConfigured: isEmailConfigured(),
+  provider: env.RESEND_API_KEY ? 'resend' : env.SMTP_HOST ? 'smtp' : 'none',
+};

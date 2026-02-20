@@ -1,5 +1,5 @@
 import { Webhook } from 'svix';
-import { env } from '../config/env.js';
+import { env, isClerkConfigured } from '../config/env.js';
 import { userService } from './userService.js';
 import { logger } from '../utils/logger.js';
 import { BadRequestError } from '../utils/errors.js';
@@ -15,7 +15,19 @@ interface ClerkUserEvent {
   type: string;
 }
 
+// Check if webhook verification is available
+const webhooksEnabled = isClerkConfigured();
+
+if (!webhooksEnabled) {
+  logger.info('Clerk webhooks disabled - webhook secret not configured');
+  logger.info('In production, set CLERK_WEBHOOK_SECRET to enable user sync from Clerk');
+}
+
 export const webhookService = {
+  /**
+   * Verify a Clerk webhook signature
+   * In demo mode (no webhook secret), this will reject all webhooks
+   */
   async verifyClerkWebhook(
     payload: string,
     headers: {
@@ -24,6 +36,14 @@ export const webhookService = {
       'svix-signature'?: string;
     }
   ): Promise<ClerkUserEvent> {
+    // If webhooks are not configured, reject the request
+    if (!webhooksEnabled) {
+      logger.warn('Webhook received but Clerk webhook secret is not configured');
+      throw new BadRequestError(
+        'Webhooks are not configured. Set CLERK_WEBHOOK_SECRET to enable.'
+      );
+    }
+
     const wh = new Webhook(env.CLERK_WEBHOOK_SECRET);
 
     const svixId = headers['svix-id'];
@@ -46,6 +66,10 @@ export const webhookService = {
     }
   },
 
+  /**
+   * Handle Clerk user events (created, updated, deleted)
+   * Syncs user data from Clerk to the local database
+   */
   async handleClerkEvent(event: ClerkUserEvent): Promise<void> {
     const { type, data } = event;
 
@@ -87,5 +111,12 @@ export const webhookService = {
       default:
         logger.debug(`Unhandled webhook type: ${type}`);
     }
+  },
+
+  /**
+   * Check if webhooks are enabled
+   */
+  isEnabled(): boolean {
+    return webhooksEnabled;
   },
 };

@@ -1,0 +1,65 @@
+# ===========================================
+# LinkUp Golf Backend - Render.com Configuration
+# ===========================================
+# Deploy to Render: https://render.com
+# Free tier: 750 hours/month, spins down after 15 min inactivity
+
+services:
+  - type: web
+    name: linkup-golf-api
+    runtime: node
+    region: ohio  # US East, close to Neon DB
+    plan: free    # Use 'starter' ($7/mo) for always-on
+
+    # Build configuration
+    buildCommand: npm ci && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm start
+
+    # Health check
+    healthCheckPath: /health
+
+    # Environment
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DEMO_MODE
+        value: "true"
+      - key: DATABASE_URL
+        sync: false  # Set manually in Render dashboard
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: CLERK_WEBHOOK_SECRET
+        sync: false
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+      - key: REDIS_URL
+        sync: false  # Optional: Upstash Redis
+      - key: OPENWEATHER_API_KEY
+        sync: false  # Optional: Weather feature
+
+    # Auto-deploy on push to main
+    autoDeploy: true
+
+    # Node version
+    nodeVersion: "20"
+
+# Optional: Background worker for jobs
+# Uncomment if you need background job processing
+# - type: worker
+#   name: linkup-golf-worker
+#   runtime: node
+#   region: ohio
+#   plan: free
+#   buildCommand: npm ci && npm run build
+#   startCommand: npm run worker
+#   envVars:
+#     - key: NODE_ENV
+#       value: production
+#     - key: DATABASE_URL
+#       sync: false

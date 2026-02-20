@@ -1,23 +1,34 @@
 import type { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '@clerk/backend';
-import { env } from '../config/env.js';
+import { verifyToken as verifyClerkToken } from '@clerk/backend';
+import { env, isClerkConfigured } from '../config/env.js';
 import { prisma } from '../config/database.js';
 import { UnauthorizedError } from '../utils/errors.js';
 import { logger } from '../utils/logger.js';
+import { verifyToken as verifyLocalToken } from '../services/authService.js';
 import type { AuthenticatedRequest } from '../types/index.js';
 
-// Check if demo mode is enabled (for deployments without real Clerk)
+// Check if demo mode is enabled (for deployments without real auth)
 const isDemoMode = process.env.DEMO_MODE === 'true';
 
 // Check if Clerk is properly configured (not using placeholder values)
-const isClerkConfigured =
-  !isDemoMode &&
-  env.CLERK_SECRET_KEY &&
-  !env.CLERK_SECRET_KEY.includes('your_clerk') &&
-  !env.CLERK_SECRET_KEY.includes('sk_test_your');
+const clerkEnabled = !isDemoMode && isClerkConfigured();
 
-if (!isClerkConfigured) {
-  logger.warn('Running in DEMO MODE - authentication bypassed');
+// Check if local auth is enabled (default: true when Clerk is not configured)
+const localAuthEnabled = process.env.LOCAL_AUTH_ENABLED !== 'false';
+
+if (!clerkEnabled && !localAuthEnabled) {
+  logger.warn('====================================================');
+  logger.warn('RUNNING IN DEMO MODE - Authentication bypassed');
+  logger.warn('To enable authentication:');
+  logger.warn('  - Configure Clerk API keys, OR');
+  logger.warn('  - Use local auth (enabled by default)');
+  logger.warn('See AUTHENTICATION.md for setup instructions');
+  logger.warn('====================================================');
+} else if (localAuthEnabled && !clerkEnabled) {
+  logger.info('====================================================');
+  logger.info('LOCAL AUTHENTICATION ENABLED');
+  logger.info('Using JWT-based local authentication');
+  logger.info('====================================================');
 }
 
 // Store current demo user ID (can be switched via /api/demo/switch-user)
@@ -73,13 +84,53 @@ async function getDevUser() {
   return user;
 }
 
+/**
+ * Verify a JWT token (either Clerk or local)
+ */
+async function verifyAuthToken(token: string) {
+  // First, try local JWT verification
+  if (localAuthEnabled) {
+    const localPayload = verifyLocalToken(token);
+    if (localPayload) {
+      const user = await prisma.user.findUnique({
+        where: { id: localPayload.userId },
+      });
+      if (user) {
+        return { user, source: 'local' as const };
+      }
+    }
+  }
+
+  // Then, try Clerk verification if enabled
+  if (clerkEnabled) {
+    try {
+      const clerkPayload = await verifyClerkToken(token, {
+        secretKey: env.CLERK_SECRET_KEY,
+      });
+
+      if (clerkPayload.sub) {
+        const user = await prisma.user.findUnique({
+          where: { clerkId: clerkPayload.sub },
+        });
+        if (user) {
+          return { user, source: 'clerk' as const };
+        }
+      }
+    } catch {
+      // Clerk verification failed, continue
+    }
+  }
+
+  return null;
+}
+
 export async function requireAuth(
   req: Request,
   _res: Response,
   next: NextFunction
 ): Promise<void> {
-  // Development mode - use mock user
-  if (!isClerkConfigured) {
+  // Demo mode - use mock user (only if both auth methods are disabled)
+  if (!clerkEnabled && !localAuthEnabled) {
     const devUser = await getDevUser();
     (req as AuthenticatedRequest).user = devUser;
     (req as AuthenticatedRequest).userId = devUser.id;
@@ -87,7 +138,7 @@ export async function requireAuth(
     return;
   }
 
-  // Production mode - verify Clerk token
+  // Production/local mode - verify token
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith('Bearer ')) {
@@ -96,33 +147,16 @@ export async function requireAuth(
 
   const token = authHeader.slice(7);
 
-  try {
-    const payload = await verifyToken(token, {
-      secretKey: env.CLERK_SECRET_KEY,
-    });
+  const result = await verifyAuthToken(token);
 
-    if (!payload.sub) {
-      throw new UnauthorizedError('Invalid token payload');
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { clerkId: payload.sub },
-    });
-
-    if (!user) {
-      throw new UnauthorizedError('User not found');
-    }
-
-    (req as AuthenticatedRequest).user = user;
-    (req as AuthenticatedRequest).userId = user.id;
-
-    next();
-  } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      throw error;
-    }
+  if (!result) {
     throw new UnauthorizedError('Invalid or expired token');
   }
+
+  (req as AuthenticatedRequest).user = result.user;
+  (req as AuthenticatedRequest).userId = result.user.id;
+
+  next();
 }
 
 export async function optionalAuth(
@@ -130,8 +164,8 @@ export async function optionalAuth(
   _res: Response,
   next: NextFunction
 ): Promise<void> {
-  // Development mode - always attach dev user
-  if (!isClerkConfigured) {
+  // Demo mode - always attach dev user (only if both auth methods are disabled)
+  if (!clerkEnabled && !localAuthEnabled) {
     const devUser = await getDevUser();
     (req as AuthenticatedRequest).user = devUser;
     (req as AuthenticatedRequest).userId = devUser.id;
@@ -139,7 +173,7 @@ export async function optionalAuth(
     return;
   }
 
-  // Production mode - verify Clerk token if present
+  // Production/local mode - verify token if present
   const authHeader = req.headers.authorization;
 
   if (!authHeader?.startsWith('Bearer ')) {
@@ -150,23 +184,24 @@ export async function optionalAuth(
   const token = authHeader.slice(7);
 
   try {
-    const payload = await verifyToken(token, {
-      secretKey: env.CLERK_SECRET_KEY,
-    });
+    const result = await verifyAuthToken(token);
 
-    if (payload.sub) {
-      const user = await prisma.user.findUnique({
-        where: { clerkId: payload.sub },
-      });
-
-      if (user) {
-        (req as AuthenticatedRequest).user = user;
-        (req as AuthenticatedRequest).userId = user.id;
-      }
+    if (result) {
+      (req as AuthenticatedRequest).user = result.user;
+      (req as AuthenticatedRequest).userId = result.user.id;
     }
   } catch {
     // Optional auth - continue without user
   }
 
   next();
+}
+
+// Export helper for other modules to check auth mode
+export function isAuthEnabled(): boolean {
+  return clerkEnabled || localAuthEnabled;
+}
+
+export function isLocalAuthEnabled(): boolean {
+  return localAuthEnabled;
 }

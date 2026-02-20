@@ -56,12 +56,13 @@ enum CourseType {
 }
 
 model User {
-  id          String      @id @default(cuid())
-  clerkId     String      @unique
-  email       String      @unique
-  firstName   String?
-  lastName    String?
-  avatarUrl   String?
+  id           String      @id @default(cuid())
+  clerkId      String      @unique
+  email        String      @unique
+  passwordHash String?     // For local authentication (bcrypt hashed)
+  firstName    String?
+  lastName     String?
+  avatarUrl    String?
   industry    Industry?
   company     String?
   jobTitle    String?

@@ -1,3 +1,4 @@
+import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { logger } from './utils/logger.js';
 import { metrics } from './utils/metrics.js';
 import { connectDatabase, disconnectDatabase } from './config/database.js';
@@ -5,6 +6,9 @@ import { connectRedis, disconnectRedis, isRedisVersionSupported } from './config
 import { createWebSocketServer, closeWebSocketServer, getServerStats } from './websocket/server.js';
 import { startEventSubscriber, stopEventSubscriber } from './events/subscriber.js';
 import { env } from './config/env.js';
+
+// HTTP server for health checks (Railway/Render requirement)
+let httpServer: ReturnType<typeof createServer> | null = null;
 
 // Job system imports (optional - requires Redis 5.0+)
 let jobsEnabled = true;
@@ -127,6 +131,30 @@ async function main(): Promise<void> {
     logger.info('Starting Redis event subscriber...');
     await startEventSubscriber();
 
+    // Start HTTP server for health checks (required for Railway/Render)
+    const httpPort = Number(process.env.PORT) || env.WS_PORT;
+    httpServer = createServer((req: IncomingMessage, res: ServerResponse) => {
+      if (req.url === '/health' || req.url === '/') {
+        const stats = getServerStats();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          status: 'ok',
+          service: 'linkup-golf-realtime',
+          timestamp: new Date().toISOString(),
+          wsPort: env.WS_PORT,
+          connections: stats.totalConnections,
+          jobsEnabled,
+        }));
+      } else {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Not found' }));
+      }
+    });
+
+    httpServer.listen(httpPort, () => {
+      logger.info({ httpPort }, 'Health check HTTP server started');
+    });
+
     // Start metrics logging
     metrics.startPeriodicLogging(60000); // Log every minute
 
@@ -195,6 +223,15 @@ async function shutdown(signal: string): Promise<void> {
     // Close WebSocket server (gracefully closes connections)
     logger.info('Closing WebSocket server...');
     await closeWebSocketServer();
+
+    // Close HTTP health check server
+    if (httpServer) {
+      logger.info('Closing HTTP health check server...');
+      await new Promise<void>((resolve) => {
+        httpServer!.close(() => resolve());
+      });
+      httpServer = null;
+    }
 
     // Disconnect from Redis
     logger.info('Disconnecting from Redis...');

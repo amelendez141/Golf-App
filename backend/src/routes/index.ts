@@ -8,9 +8,11 @@ import { weatherRoutes } from './weatherRoutes.js';
 import { conditionRoutes } from './conditionRoutes.js';
 import { healthRoutes } from './healthRoutes.js';
 import { connectRoutes } from './connectRoutes.js';
+import { authRoutes } from './authRoutes.js';
 
 const router = Router();
 
+router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/courses', courseRoutes);
 router.use('/tee-times', teeTimeRoutes);
