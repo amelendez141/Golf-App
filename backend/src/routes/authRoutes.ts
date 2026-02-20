@@ -169,25 +169,47 @@ router.post('/login', async (req: Request, res: Response) => {
 
   const { email, password } = parseResult.data;
 
+  // Demo mode: allow any credentials to login as first matching user or demo user
+  const isDemoMode = process.env.DEMO_MODE === 'true';
+
   // Find user by email
-  const user = await prisma.user.findUnique({
+  let user = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
   });
+
+  // In demo mode, if user not found by email, find any demo user
+  if (!user && isDemoMode) {
+    user = await prisma.user.findFirst({
+      where: {
+        email: { contains: email.split('@')[0].toLowerCase() },
+      },
+    });
+
+    // If still not found, get the first user in the database
+    if (!user) {
+      user = await prisma.user.findFirst({
+        orderBy: { createdAt: 'asc' },
+      });
+    }
+  }
 
   if (!user) {
     throw new UnauthorizedError('Invalid email or password');
   }
 
-  // Check if user has a password (local auth users)
-  if (!user.passwordHash) {
-    throw new UnauthorizedError('This account uses external authentication. Please sign in with your provider.');
-  }
+  // In demo mode, skip password verification
+  if (!isDemoMode) {
+    // Check if user has a password (local auth users)
+    if (!user.passwordHash) {
+      throw new UnauthorizedError('This account uses external authentication. Please sign in with your provider.');
+    }
 
-  // Verify password
-  const isValidPassword = await comparePassword(password, user.passwordHash);
+    // Verify password
+    const isValidPassword = await comparePassword(password, user.passwordHash);
 
-  if (!isValidPassword) {
-    throw new UnauthorizedError('Invalid email or password');
+    if (!isValidPassword) {
+      throw new UnauthorizedError('Invalid email or password');
+    }
   }
 
   // Generate JWT token
