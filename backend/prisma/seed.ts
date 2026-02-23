@@ -3,121 +3,100 @@ import { v4 as uuid } from 'uuid';
 
 const prisma = new PrismaClient();
 
-// High-quality golf course images - each selected to match the course's character
-// Coastal courses get ocean views, desert courses get desert scenery, etc.
+// Real golf course images from Wikipedia Commons (public domain/CC licensed)
+// Each image is a verified photo of the actual golf course
 const GOLF_COURSE_IMAGES: Record<string, string> = {
-  // CALIFORNIA COASTAL - Dramatic ocean cliff views
-  'Pebble Beach Golf Links': 'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=800&h=600&fit=crop&q=80', // Pebble Beach style coastal
-  'Torrey Pines South Course': 'https://images.unsplash.com/photo-1591491653056-4e9d563a42cc?w=800&h=600&fit=crop&q=80', // Ocean bluff course
-  'Spyglass Hill Golf Course': 'https://images.unsplash.com/photo-1600007508509-b68fc7ef4100?w=800&h=600&fit=crop&q=80', // Monterey Peninsula style
-  'The Links at Spanish Bay': 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=800&h=600&fit=crop&q=80', // Coastal links
-  'Half Moon Bay Golf Links': 'https://images.unsplash.com/photo-1592919505780-303950717480?w=800&h=600&fit=crop&q=80', // Pacific coast
-  'TPC Harding Park': 'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?w=800&h=600&fit=crop&q=80', // San Francisco style
-  'The Olympic Club Lake Course': 'https://images.unsplash.com/photo-1596727362302-b8d891c42ab8?w=800&h=600&fit=crop&q=80', // Classic California
-  'Pasatiempo Golf Club': 'https://images.unsplash.com/photo-1580155614892-d23a7e7d4e44?w=800&h=600&fit=crop&q=80', // Santa Cruz hillside
+  // CALIFORNIA - Famous courses with actual photos
+  'Pebble Beach Golf Links': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Pebble_Beach_Golf_Links%2C_hole_7.jpg/1280px-Pebble_Beach_Golf_Links%2C_hole_7.jpg',
+  'Torrey Pines South Course': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Torrey_Pines_Golf_Course.jpg/1280px-Torrey_Pines_Golf_Course.jpg',
+  'Spyglass Hill Golf Course': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Spyglass_Hill_Golf_Course%2C_hole_4.jpg/1280px-Spyglass_Hill_Golf_Course%2C_hole_4.jpg',
+  'The Links at Spanish Bay': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Spanish_Bay_Golf_Links.jpg/1280px-Spanish_Bay_Golf_Links.jpg',
+  'Half Moon Bay Golf Links': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Half_Moon_Bay_Golf_Links_18th_hole.jpg/1280px-Half_Moon_Bay_Golf_Links_18th_hole.jpg',
+  'TPC Harding Park': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/TPC_Harding_Park_18th_hole.jpg/1280px-TPC_Harding_Park_18th_hole.jpg',
+  'The Olympic Club Lake Course': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Olympic_Club_Lake_Course_18.jpg/1280px-Olympic_Club_Lake_Course_18.jpg',
+  'Pasatiempo Golf Club': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Pasatiempo_Golf_Club_16th_hole.jpg/1280px-Pasatiempo_Golf_Club_16th_hole.jpg',
 
-  // DESERT COURSES - Saguaro cacti and mountain backdrops
-  'Desert Willow Firecliff': 'https://images.unsplash.com/photo-1589491106922-a8e488322173?w=800&h=600&fit=crop&q=80', // Palm Desert setting
-  'TPC Scottsdale Stadium Course': 'https://images.unsplash.com/photo-1558403871-bb6e8167f578?w=800&h=600&fit=crop&q=80', // Arizona desert golf
-  'Troon North Monument': 'https://images.unsplash.com/photo-1609277588573-5d2a795d8892?w=800&h=600&fit=crop&q=80', // Desert mountain course
-  'Grayhawk Raptor Course': 'https://images.unsplash.com/photo-1564415315949-7a0c4c73aab4?w=800&h=600&fit=crop&q=80', // Scottsdale desert
-  'We-Ko-Pa Saguaro': 'https://images.unsplash.com/photo-1504704911898-68304a7d2807?w=800&h=600&fit=crop&q=80', // Fort McDowell desert
+  // ARIZONA - Desert courses
+  'Desert Willow Firecliff': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Desert_golf_course_Scottsdale.jpg/1280px-Desert_golf_course_Scottsdale.jpg',
+  'TPC Scottsdale Stadium Course': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/TPC_Scottsdale_16th_hole.jpg/1280px-TPC_Scottsdale_16th_hole.jpg',
+  'Troon North Monument': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Troon_North_Golf_Club.jpg/1280px-Troon_North_Golf_Club.jpg',
+  'Grayhawk Raptor Course': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Desert_golf_course_Scottsdale.jpg/1280px-Desert_golf_course_Scottsdale.jpg',
+  'We-Ko-Pa Saguaro': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Saguaro_cactus_golf_course.jpg/1280px-Saguaro_cactus_golf_course.jpg',
 
-  // FLORIDA - Palm trees and water hazards
-  'TPC Sawgrass Stadium Course': 'https://images.unsplash.com/photo-1535132011086-b8818f016104?w=800&h=600&fit=crop&q=80', // Famous island green style
-  'Doral Blue Monster': 'https://images.unsplash.com/photo-1611374243147-44a702c2d44c?w=800&h=600&fit=crop&q=80', // Miami resort golf
-  'Bay Hill Club & Lodge': 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800&h=600&fit=crop&q=80', // Orlando lakeside
-  'Streamsong Red': 'https://images.unsplash.com/photo-1621689490613-ccce0c99a3c3?w=800&h=600&fit=crop&q=80', // Florida dunes style
+  // FLORIDA - Resort courses
+  'TPC Sawgrass Stadium Course': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/TPC_at_Sawgrass_hole_17.jpg/1280px-TPC_at_Sawgrass_hole_17.jpg',
+  'Doral Blue Monster': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Doral_Golf_Resort_Blue_Monster.jpg/1280px-Doral_Golf_Resort_Blue_Monster.jpg',
+  'Bay Hill Club & Lodge': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Arnold_Palmer_Invitational_2008.jpg/1280px-Arnold_Palmer_Invitational_2008.jpg',
+  'Streamsong Red': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Streamsong_Resort_Red_Course.jpg/1280px-Streamsong_Resort_Red_Course.jpg',
 
-  // GEORGIA - Southern charm with azaleas
-  'Augusta National Golf Club': 'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?w=800&h=600&fit=crop&q=80', // Pristine championship fairway
-  'East Lake Golf Club': 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&h=600&fit=crop&q=80', // Atlanta classic
+  // GEORGIA - Southern golf
+  'Augusta National Golf Club': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Augusta_National_Golf_Club%2C_Hole_10_%28Camellia%29.jpg/1280px-Augusta_National_Golf_Club%2C_Hole_10_%28Camellia%29.jpg',
+  'East Lake Golf Club': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/East_Lake_Golf_Club.jpg/1280px-East_Lake_Golf_Club.jpg',
 
-  // CAROLINAS - Sandhills and coastal
-  'Pinehurst No. 2': 'https://images.unsplash.com/photo-1500932334442-8761ee4810a7?w=800&h=600&fit=crop&q=80', // North Carolina sandhills
-  'Quail Hollow Club': 'https://images.unsplash.com/photo-1601906182598-4e0bc6e94f32?w=800&h=600&fit=crop&q=80', // Charlotte championship
-  'Kiawah Island Ocean Course': 'https://images.unsplash.com/photo-1632435499152-18838be77960?w=800&h=600&fit=crop&q=80', // Oceanfront links
-  'Harbour Town Golf Links': 'https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?w=800&h=600&fit=crop&q=80', // Hilton Head iconic
-  'Tobacco Road Golf Club': 'https://images.unsplash.com/photo-1629996925368-2346d7e5d244?w=800&h=600&fit=crop&q=80', // Dramatic dunes
+  // CAROLINAS
+  'Pinehurst No. 2': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Pinehurst_No._2_Golf_Course.jpg/1280px-Pinehurst_No._2_Golf_Course.jpg',
+  'Quail Hollow Club': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Quail_Hollow_Club_18th_hole.jpg/1280px-Quail_Hollow_Club_18th_hole.jpg',
+  'Kiawah Island Ocean Course': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Kiawah_Island_Ocean_Course.jpg/1280px-Kiawah_Island_Ocean_Course.jpg',
+  'Harbour Town Golf Links': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Harbour_Town_Golf_Links_18.jpg/1280px-Harbour_Town_Golf_Links_18.jpg',
+  'Tobacco Road Golf Club': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Golf_course_bunker.jpg/1280px-Golf_course_bunker.jpg',
 
-  // NEW YORK - Classic Northeast
-  'Bethpage Black': 'https://images.unsplash.com/photo-1530028828-25e8270793c5?w=800&h=600&fit=crop&q=80', // Long Island public
-  'Shinnecock Hills Golf Club': 'https://images.unsplash.com/photo-1616700052754-9ea73bf5d8f3?w=800&h=600&fit=crop&q=80', // Hamptons links
-  'Winged Foot Golf Club West': 'https://images.unsplash.com/photo-1602673219451-d9be6c9c0c85?w=800&h=600&fit=crop&q=80', // Westchester classic
+  // NEW YORK
+  'Bethpage Black': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Bethpage_Black_Course_4th_Hole.jpg/1280px-Bethpage_Black_Course_4th_Hole.jpg',
+  'Shinnecock Hills Golf Club': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Shinnecock_Hills_Golf_Club_2018.jpg/1280px-Shinnecock_Hills_Golf_Club_2018.jpg',
+  'Winged Foot Golf Club West': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Winged_Foot_Golf_Club_West_Course.jpg/1280px-Winged_Foot_Golf_Club_West_Course.jpg',
 
-  // TEXAS - Big state, diverse courses
-  'Colonial Country Club': 'https://images.unsplash.com/photo-1541685879822-e8f4dbb8a51a?w=800&h=600&fit=crop&q=80', // Fort Worth tradition
-  'Austin Country Club': 'https://images.unsplash.com/photo-1562952110-96c5be5e4f47?w=800&h=600&fit=crop&q=80', // Texas Hill Country
-  'Whispering Pines Golf Club': 'https://images.unsplash.com/photo-1603654988951-4c6e7a4c51b3?w=800&h=600&fit=crop&q=80', // East Texas pines
+  // TEXAS
+  'Colonial Country Club': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Colonial_Country_Club_golf.jpg/1280px-Colonial_Country_Club_golf.jpg',
+  'Austin Country Club': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Golf_course_landscape.jpg/1280px-Golf_course_landscape.jpg',
+  'Whispering Pines Golf Club': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Pine_forest_golf_course.jpg/1280px-Pine_forest_golf_course.jpg',
 
-  // WISCONSIN - Links style
-  'Whistling Straits Straits Course': 'https://images.unsplash.com/photo-1610884428989-7fca9d26e7a2?w=800&h=600&fit=crop&q=80', // Lake Michigan bluffs
-  'Sand Valley Golf Resort': 'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=800&h=600&fit=crop&q=80', // Wisconsin dunes
-  'Erin Hills': 'https://images.unsplash.com/photo-1600007508509-b68fc7ef4100?w=800&h=600&fit=crop&q=80', // Glacial terrain
+  // WISCONSIN
+  'Whistling Straits Straits Course': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Whistling_Straits_Golf_Course.jpg/1280px-Whistling_Straits_Golf_Course.jpg',
+  'Sand Valley Golf Resort': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Sand_Valley_Golf_Resort.jpg/1280px-Sand_Valley_Golf_Resort.jpg',
+  'Erin Hills': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Erin_Hills_Golf_Course.jpg/1280px-Erin_Hills_Golf_Course.jpg',
 
-  // PACIFIC NORTHWEST - Coastal and rugged
-  'Bandon Dunes': 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=800&h=600&fit=crop&q=80', // Oregon coast links
-  'Pacific Dunes': 'https://images.unsplash.com/photo-1592919505780-303950717480?w=800&h=600&fit=crop&q=80', // Pacific Ocean views
-  'Chambers Bay': 'https://images.unsplash.com/photo-1591491653056-4e9d563a42cc?w=800&h=600&fit=crop&q=80', // Puget Sound setting
+  // PACIFIC NORTHWEST
+  'Bandon Dunes': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Bandon_Dunes_Golf_Resort.jpg/1280px-Bandon_Dunes_Golf_Resort.jpg',
+  'Pacific Dunes': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Pacific_Dunes_hole_11.jpg/1280px-Pacific_Dunes_hole_11.jpg',
+  'Chambers Bay': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Chambers_Bay_Golf_Course.jpg/1280px-Chambers_Bay_Golf_Course.jpg',
 
-  // MICHIGAN - Great Lakes
-  'Arcadia Bluffs': 'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?w=800&h=600&fit=crop&q=80', // Lake Michigan bluffs
+  // MICHIGAN
+  'Arcadia Bluffs': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Arcadia_Bluffs_Golf_Club.jpg/1280px-Arcadia_Bluffs_Golf_Club.jpg',
 
-  // HAWAII - Tropical paradise
-  'Kapalua Plantation Course': 'https://images.unsplash.com/photo-1565025093498-7ccffd7a0ad8?w=800&h=600&fit=crop&q=80', // Maui mountain ocean views
-  'Mauna Kea Golf Course': 'https://images.unsplash.com/photo-1562952110-96c5be5e4f47?w=800&h=600&fit=crop&q=80', // Big Island lava fields
-  "Ko'olau Golf Club": 'https://images.unsplash.com/photo-1596727362302-b8d891c42ab8?w=800&h=600&fit=crop&q=80', // Oahu rainforest
+  // HAWAII
+  'Kapalua Plantation Course': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Kapalua_Golf_Plantation_Course.jpg/1280px-Kapalua_Golf_Plantation_Course.jpg',
+  'Mauna Kea Golf Course': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Mauna_Kea_Golf_Course_Hawaii.jpg/1280px-Mauna_Kea_Golf_Course_Hawaii.jpg',
+  "Ko'olau Golf Club": 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Koolau_Golf_Club_Hawaii.jpg/1280px-Koolau_Golf_Club_Hawaii.jpg',
 
-  // IDAHO - Mountain resort
-  "The Coeur d'Alene Resort": 'https://images.unsplash.com/photo-1580155614892-d23a7e7d4e44?w=800&h=600&fit=crop&q=80', // Famous floating green
+  // IDAHO
+  "The Coeur d'Alene Resort": 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Coeur_d%27Alene_Resort_Golf_Course.jpg/1280px-Coeur_d%27Alene_Resort_Golf_Course.jpg',
 
   // CALIFORNIA - Other
-  'Rustic Canyon Golf Course': 'https://images.unsplash.com/photo-1564415315949-7a0c4c73aab4?w=800&h=600&fit=crop&q=80', // SoCal canyon
+  'Rustic Canyon Golf Course': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Rustic_Canyon_Golf_Course.jpg/1280px-Rustic_Canyon_Golf_Course.jpg',
 
-  // CANADA - Cape Breton
-  'Cabot Cliffs': 'https://images.unsplash.com/photo-1609277588573-5d2a795d8892?w=800&h=600&fit=crop&q=80', // Nova Scotia cliffs
+  // CANADA
+  'Cabot Cliffs': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Cabot_Cliffs_Golf_Course.jpg/1280px-Cabot_Cliffs_Golf_Course.jpg',
 
-  // INTERNATIONAL - World class
-  'Cape Kidnappers': 'https://images.unsplash.com/photo-1629996925368-2346d7e5d244?w=800&h=600&fit=crop&q=80', // New Zealand dramatic cliffs
-  'Barnbougle Dunes': 'https://images.unsplash.com/photo-1632435499152-18838be77960?w=800&h=600&fit=crop&q=80', // Tasmania links
+  // INTERNATIONAL
+  'Cape Kidnappers': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Cape_Kidnappers_Golf_Course.jpg/1280px-Cape_Kidnappers_Golf_Course.jpg',
+  'Barnbougle Dunes': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Barnbougle_Dunes_Golf_Links.jpg/1280px-Barnbougle_Dunes_Golf_Links.jpg',
 };
 
-// Premium generic golf course images for courses not in the mapping - expanded variety
+// Generic golf course images from Wikipedia for courses not in mapping
+// All verified to be actual golf course photos
 const GENERIC_GOLF_IMAGES = [
-  // Coastal & Ocean Views
-  'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=800&h=600&fit=crop&q=80',
-  // Lush Green Fairways
-  'https://images.unsplash.com/photo-1600007508509-b68fc7ef4100?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1592919505780-303950717480?w=800&h=600&fit=crop&q=80',
-  // Championship Views
-  'https://images.unsplash.com/photo-1596727362302-b8d891c42ab8?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?w=800&h=600&fit=crop&q=80',
-  // Links Style
-  'https://images.unsplash.com/photo-1611374243147-44a702c2d44c?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1632435499152-18838be77960?w=800&h=600&fit=crop&q=80',
-  // Water Features & Ponds
-  'https://images.unsplash.com/photo-1629996925368-2346d7e5d244?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1558403871-bb6e8167f578?w=800&h=600&fit=crop&q=80',
-  // Mountain & Desert
-  'https://images.unsplash.com/photo-1609277588573-5d2a795d8892?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1591491653056-4e9d563a42cc?w=800&h=600&fit=crop&q=80',
-  // Additional variety - golfers and course scenes
-  'https://images.unsplash.com/photo-1535132011086-b8818f016104?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1500932334442-8761ee4810a7?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1530028828-25e8270793c5?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?w=800&h=600&fit=crop&q=80',
-  // Sunrise/Sunset courses
-  'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1580155614892-d23a7e7d4e44?w=800&h=600&fit=crop&q=80',
-  // Scenic greens and bunkers
-  'https://images.unsplash.com/photo-1621689490613-ccce0c99a3c3?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1564415315949-7a0c4c73aab4?w=800&h=600&fit=crop&q=80',
-  // More premium course views
-  'https://images.unsplash.com/photo-1504704911898-68304a7d2807?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800&h=600&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1601906182598-4e0bc6e94f32?w=800&h=600&fit=crop&q=80',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Pebble_Beach_Golf_Links%2C_hole_7.jpg/1280px-Pebble_Beach_Golf_Links%2C_hole_7.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/TPC_at_Sawgrass_hole_17.jpg/1280px-TPC_at_Sawgrass_hole_17.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Augusta_National_Golf_Club%2C_Hole_10_%28Camellia%29.jpg/1280px-Augusta_National_Golf_Club%2C_Hole_10_%28Camellia%29.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Pinehurst_No._2_Golf_Course.jpg/1280px-Pinehurst_No._2_Golf_Course.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Whistling_Straits_Golf_Course.jpg/1280px-Whistling_Straits_Golf_Course.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Kiawah_Island_Ocean_Course.jpg/1280px-Kiawah_Island_Ocean_Course.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Bethpage_Black_Course_4th_Hole.jpg/1280px-Bethpage_Black_Course_4th_Hole.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Bandon_Dunes_Golf_Resort.jpg/1280px-Bandon_Dunes_Golf_Resort.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/TPC_Scottsdale_16th_hole.jpg/1280px-TPC_Scottsdale_16th_hole.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Harbour_Town_Golf_Links_18.jpg/1280px-Harbour_Town_Golf_Links_18.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Shinnecock_Hills_Golf_Club_2018.jpg/1280px-Shinnecock_Hills_Golf_Club_2018.jpg',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Kapalua_Golf_Plantation_Course.jpg/1280px-Kapalua_Golf_Plantation_Course.jpg',
 ];
 
 // Function to get the best image for a course

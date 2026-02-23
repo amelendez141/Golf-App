@@ -1,9 +1,38 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Container } from '@/components/layout/Container';
 import { Navbar } from '@/components/layout/Navbar';
+import { useAuth } from '@/lib/auth';
 
 export default function LandingPage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Redirect authenticated users to feed
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace('/feed');
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-secondary flex items-center justify-center">
+        <div className="animate-pulse text-primary">Loading...</div>
+      </div>
+    );
+  }
+
+  // If authenticated, show nothing while redirecting
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-secondary">
       <Navbar />
