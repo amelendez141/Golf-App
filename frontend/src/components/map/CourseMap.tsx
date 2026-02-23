@@ -55,7 +55,13 @@ interface CourseMapProps {
   className?: string;
 }
 
-// Custom hook to handle map events
+// Dynamically import map event hooks
+const MapEventsComponent = dynamic(
+  () => import('./MapEventsHelper').then((mod) => mod.MapEventsHelper),
+  { ssr: false }
+);
+
+// Wrapper for map events
 function MapEvents({
   onBoundsChange,
   markers,
@@ -67,36 +73,14 @@ function MapEvents({
   selectedMarkerId?: string;
   mapRef: React.MutableRefObject<L.Map | null>;
 }) {
-  const { useMapEvents, useMap } = require('react-leaflet');
-
-  const map = useMap();
-  mapRef.current = map;
-
-  useMapEvents({
-    moveend: () => {
-      if (onBoundsChange) {
-        const bounds = map.getBounds();
-        onBoundsChange({
-          north: bounds.getNorth(),
-          south: bounds.getSouth(),
-          east: bounds.getEast(),
-          west: bounds.getWest(),
-        });
-      }
-    },
-  });
-
-  // Fly to selected marker
-  useEffect(() => {
-    if (selectedMarkerId && map) {
-      const marker = markers.find((m) => m.id === selectedMarkerId);
-      if (marker) {
-        map.flyTo([marker.lat, marker.lng], 14, { duration: 1 });
-      }
-    }
-  }, [selectedMarkerId, markers, map]);
-
-  return null;
+  return (
+    <MapEventsComponent
+      onBoundsChange={onBoundsChange}
+      markers={markers}
+      selectedMarkerId={selectedMarkerId}
+      mapRef={mapRef}
+    />
+  );
 }
 
 export function CourseMap({

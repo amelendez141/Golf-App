@@ -21,6 +21,7 @@ export interface TeeTimeWithRelations extends TeeTime {
     state: string;
     latitude: number;
     longitude: number;
+    imageUrl: string | null;
   };
   slots: TeeTimeSlot[];
   _count: {
@@ -48,6 +49,7 @@ const teeTimeInclude = {
       state: true,
       latitude: true,
       longitude: true,
+      imageUrl: true,
     },
   },
   slots: {

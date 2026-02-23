@@ -2,9 +2,9 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '@/components/layout/Container';
-import { CourseMap } from '@/components/map/CourseMap';
 import { CourseBottomSheet } from '@/components/map/CourseBottomSheet';
 import { MapFilterChips, type MapFilters } from '@/components/map/MapFilterChips';
 import { Button } from '@/components/ui/Button';
@@ -14,6 +14,26 @@ import { useUserStore } from '@/lib/stores/userStore';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 import type { MapMarker, MapBounds, Course } from '@/lib/types';
+
+// Dynamically import the map to avoid SSR issues
+const CourseMap = dynamic(
+  () => import('@/components/map/CourseMap').then((mod) => mod.CourseMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-full w-full flex items-center justify-center bg-secondary">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+            <svg className="w-6 h-6 text-primary/60" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+            </svg>
+          </div>
+          <p className="text-text-muted text-sm">Loading map...</p>
+        </div>
+      </div>
+    ),
+  }
+);
 
 export default function ExplorePage() {
   const router = useRouter();
