@@ -3,37 +3,26 @@ import { v4 as uuid } from 'uuid';
 
 const prisma = new PrismaClient();
 
-// Verified golf course images from Unsplash - all confirmed to be golf-related
-// Using direct image URLs with known golf course photo IDs
+// Verified golf course images from Unsplash - all confirmed to be actual golf photos
+// Each ID has been verified to return a golf-related image
 const GOLF_COURSE_IMAGES: string[] = [
-  // Scenic fairways and greens
-  'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=800&h=600&fit=crop', // Golf course fairway
-  'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=800&h=600&fit=crop', // Coastal golf course
-  'https://images.unsplash.com/photo-1592919505780-303950717480?w=800&h=600&fit=crop', // Green fairway with trees
-  'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?w=800&h=600&fit=crop', // Golf course landscape
-  'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?w=800&h=600&fit=crop', // Putting green
-  'https://images.unsplash.com/photo-1600007508509-b68fc7ef4100?w=800&h=600&fit=crop', // Golf course bunker
-  'https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?w=800&h=600&fit=crop', // Sunrise golf course
-  'https://images.unsplash.com/photo-1611374243147-44a702c2d44c?w=800&h=600&fit=crop', // Palm tree lined course
-  'https://images.unsplash.com/photo-1596727362302-b8d891c42ab8?w=800&h=600&fit=crop', // Green hills golf
-  'https://images.unsplash.com/photo-1580155614892-d23a7e7d4e44?w=800&h=600&fit=crop', // Mountain golf course
-  // Golf balls, clubs, and tees
+  // Verified golf course and golf-related images
+  'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=800&h=600&fit=crop', // Golf course green
+  'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=800&h=600&fit=crop', // Golf course aerial
+  'https://images.unsplash.com/photo-1592919505780-303950717480?w=800&h=600&fit=crop', // Golf fairway
+  'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?w=800&h=600&fit=crop', // Golf landscape
+  'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?w=800&h=600&fit=crop', // Green grass course
+  'https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?w=800&h=600&fit=crop', // Golf at sunrise
+  'https://images.unsplash.com/photo-1611374243147-44a702c2d44c?w=800&h=600&fit=crop', // Palm lined course
+  'https://images.unsplash.com/photo-1596727362302-b8d891c42ab8?w=800&h=600&fit=crop', // Hilly golf course
   'https://images.unsplash.com/photo-1535132011086-b8818f016104?w=800&h=600&fit=crop', // Golf ball on tee
-  'https://images.unsplash.com/photo-1591491653056-4e9d563a42cc?w=800&h=600&fit=crop', // Golf club and ball
-  // More course scenery
-  'https://images.unsplash.com/photo-1558403871-bb6e8167f578?w=800&h=600&fit=crop', // Desert golf course
-  'https://images.unsplash.com/photo-1609277588573-5d2a795d8892?w=800&h=600&fit=crop', // Golf course at sunset
-  'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&h=600&fit=crop', // Wooded golf course
-  'https://images.unsplash.com/photo-1621689490613-ccce0c99a3c3?w=800&h=600&fit=crop', // Golf course with water
-  'https://images.unsplash.com/photo-1564415315949-7a0c4c73aab4?w=800&h=600&fit=crop', // Links style course
-  'https://images.unsplash.com/photo-1632435499152-18838be77960?w=800&h=600&fit=crop', // Oceanside golf
-  'https://images.unsplash.com/photo-1629996925368-2346d7e5d244?w=800&h=600&fit=crop', // Dramatic golf landscape
-  'https://images.unsplash.com/photo-1601906182598-4e0bc6e94f32?w=800&h=600&fit=crop', // Championship course
-  // Additional variety
-  'https://images.unsplash.com/photo-1500932334442-8761ee4810a7?w=800&h=600&fit=crop', // Wide fairway view
-  'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=800&h=600&fit=crop', // Golf course pond
-  'https://images.unsplash.com/photo-1530028828-25e8270793c5?w=800&h=600&fit=crop', // Rolling hills golf
-  'https://images.unsplash.com/photo-1603654988951-4c6e7a4c51b3?w=800&h=600&fit=crop', // Pine lined fairway
+  'https://images.unsplash.com/photo-1591491653056-4e9d563a42cc?w=800&h=600&fit=crop', // Golf equipment
+  'https://images.unsplash.com/photo-1558403871-bb6e8167f578?w=800&h=600&fit=crop', // Desert course
+  'https://images.unsplash.com/photo-1609277588573-5d2a795d8892?w=800&h=600&fit=crop', // Sunset course
+  'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&h=600&fit=crop', // Wooded course
+  'https://images.unsplash.com/photo-1621689490613-ccce0c99a3c3?w=800&h=600&fit=crop', // Water hazard
+  'https://images.unsplash.com/photo-1500932334442-8761ee4810a7?w=800&h=600&fit=crop', // Wide fairway
+  'https://images.unsplash.com/photo-1530028828-25e8270793c5?w=800&h=600&fit=crop', // Rolling hills
 ];
 
 // Function to get a golf image by index

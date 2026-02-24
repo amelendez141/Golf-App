@@ -76,8 +76,8 @@ export default function ExplorePage() {
   // Convert courses to map markers
   const markers: MapMarker[] = coursesToShow.map((course: any) => ({
     id: course.id,
-    lat: course.lat,
-    lng: course.lng,
+    lat: course.latitude,
+    lng: course.longitude,
     course,
     openSlots: Math.floor(Math.random() * 4), // Mock data
     teeTimeCount: Math.floor(Math.random() * 5) + 1, // Mock data
