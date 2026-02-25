@@ -3,55 +3,54 @@ import { v4 as uuid } from 'uuid';
 
 const prisma = new PrismaClient();
 
-// Professional landscape images from Lorem Picsum - guaranteed to load consistently
-// Each image uses a specific seed for consistency across reseeds
-// These are high-quality landscape images suitable for golf course placeholders
+// Verified golf course images from Unsplash - all manually verified to be actual golf photos
+// Each image URL has been extracted from verified Unsplash golf photo pages
 const GOLF_COURSE_IMAGES: string[] = [
-  'https://picsum.photos/seed/golfcourse1/800/600',
-  'https://picsum.photos/seed/golfcourse2/800/600',
-  'https://picsum.photos/seed/golfcourse3/800/600',
-  'https://picsum.photos/seed/golfcourse4/800/600',
-  'https://picsum.photos/seed/golfcourse5/800/600',
-  'https://picsum.photos/seed/golfcourse6/800/600',
-  'https://picsum.photos/seed/golfcourse7/800/600',
-  'https://picsum.photos/seed/golfcourse8/800/600',
-  'https://picsum.photos/seed/golfcourse9/800/600',
-  'https://picsum.photos/seed/golfcourse10/800/600',
-  'https://picsum.photos/seed/golfcourse11/800/600',
-  'https://picsum.photos/seed/golfcourse12/800/600',
-  'https://picsum.photos/seed/golfcourse13/800/600',
-  'https://picsum.photos/seed/golfcourse14/800/600',
-  'https://picsum.photos/seed/golfcourse15/800/600',
-  'https://picsum.photos/seed/golfcourse16/800/600',
-  'https://picsum.photos/seed/golfcourse17/800/600',
-  'https://picsum.photos/seed/golfcourse18/800/600',
-  'https://picsum.photos/seed/golfcourse19/800/600',
-  'https://picsum.photos/seed/golfcourse20/800/600',
-  'https://picsum.photos/seed/golfcourse21/800/600',
-  'https://picsum.photos/seed/golfcourse22/800/600',
-  'https://picsum.photos/seed/golfcourse23/800/600',
-  'https://picsum.photos/seed/golfcourse24/800/600',
-  'https://picsum.photos/seed/golfcourse25/800/600',
-  'https://picsum.photos/seed/golfcourse26/800/600',
-  'https://picsum.photos/seed/golfcourse27/800/600',
-  'https://picsum.photos/seed/golfcourse28/800/600',
-  'https://picsum.photos/seed/golfcourse29/800/600',
-  'https://picsum.photos/seed/golfcourse30/800/600',
-  'https://picsum.photos/seed/golfcourse31/800/600',
-  'https://picsum.photos/seed/golfcourse32/800/600',
-  'https://picsum.photos/seed/golfcourse33/800/600',
-  'https://picsum.photos/seed/golfcourse34/800/600',
-  'https://picsum.photos/seed/golfcourse35/800/600',
-  'https://picsum.photos/seed/golfcourse36/800/600',
-  'https://picsum.photos/seed/golfcourse37/800/600',
-  'https://picsum.photos/seed/golfcourse38/800/600',
-  'https://picsum.photos/seed/golfcourse39/800/600',
-  'https://picsum.photos/seed/golfcourse40/800/600',
-  'https://picsum.photos/seed/golfcourse41/800/600',
-  'https://picsum.photos/seed/golfcourse42/800/600',
-  'https://picsum.photos/seed/golfcourse43/800/600',
-  'https://picsum.photos/seed/golfcourse44/800/600',
-  'https://picsum.photos/seed/golfcourse45/800/600',
+  // Aerial views and course landscapes
+  'https://images.unsplash.com/photo-1742498626135-67a7d3501eff?w=800&h=600&fit=crop', // Aerial view of beautiful golf course
+  'https://images.unsplash.com/photo-1544733274-e33e953ceb9e?w=800&h=600&fit=crop', // Aerial view green golf course
+  'https://images.unsplash.com/photo-1699394426296-9c549c27fcaf?w=800&h=600&fit=crop', // Golf course surrounded by trees
+  'https://images.unsplash.com/photo-1561066030-f096e3ba23dd?w=800&h=600&fit=crop', // Golf field near cliff ocean
+  'https://images.unsplash.com/photo-1509586721451-a990371f8243?w=800&h=600&fit=crop', // Man playing golf
+  'https://images.unsplash.com/photo-1503410759647-41040b696833?w=800&h=600&fit=crop', // Golf ball on green
+  'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?w=800&h=600&fit=crop', // Golf club on course
+  'https://images.unsplash.com/photo-1641584087157-cd712948ce6b?w=800&h=600&fit=crop', // Golf course at sunset
+  'https://images.unsplash.com/photo-1694636507260-8b2428e3b738?w=800&h=600&fit=crop', // Aerial green golf course
+  'https://images.unsplash.com/photo-1693163537665-b7c5a5f01f75?w=800&h=600&fit=crop', // Man walking golf course
+  'https://images.unsplash.com/photo-1704863619342-9cf73eca5fe8?w=800&h=600&fit=crop', // Golf ball and club putting green
+  'https://images.unsplash.com/photo-1692931460164-f71ed1101ecf?w=800&h=600&fit=crop', // Golf course ocean view
+  'https://images.unsplash.com/photo-1638662293033-7834e41473ae?w=800&h=600&fit=crop', // Aerial golf course in city
+  'https://images.unsplash.com/photo-1576555928619-03d62a29e4a1?w=800&h=600&fit=crop', // White golf ball
+  'https://images.unsplash.com/photo-1621005570352-6418df03796b?w=800&h=600&fit=crop', // Golf ball on green grass
+  'https://images.unsplash.com/photo-1593111774642-a746f5006b7b?w=800&h=600&fit=crop', // Man putting golf ball
+  'https://images.unsplash.com/photo-1648219124133-8e53e8a9577c?w=800&h=600&fit=crop', // Aerial man playing golf
+  'https://images.unsplash.com/photo-1597369237991-5c95d1b6e0c8?w=800&h=600&fit=crop', // Golf ball green grass field
+  'https://images.unsplash.com/photo-1746209843615-6b007f4ac00d?w=800&h=600&fit=crop', // Golf ball on golden tee
+  'https://images.unsplash.com/photo-1674884070794-b61d85f9adf8?w=800&h=600&fit=crop', // Scenic golf course with lake
+  // Golfers and action shots
+  'https://images.unsplash.com/photo-1535132011086-b8818f016104?w=800&h=600&fit=crop', // Man playing golf daytime
+  'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=800&h=600&fit=crop', // Man swinging golf driver
+  'https://images.unsplash.com/photo-1597368629379-64c0c151431b?w=800&h=600&fit=crop', // Man swinging club in field
+  'https://images.unsplash.com/photo-1576247975963-4995837fb3e6?w=800&h=600&fit=crop', // Man hitting golf ball
+  'https://images.unsplash.com/photo-1723717729877-6a0bb3095c30?w=800&h=600&fit=crop', // Man swinging at ball
+  'https://images.unsplash.com/photo-1769103638533-eb73b58b610b?w=800&h=600&fit=crop', // Man hitting golf ball
+  'https://images.unsplash.com/photo-1611374243147-44a702c2d44c?w=800&h=600&fit=crop', // Man playing golf daytime
+  'https://images.unsplash.com/photo-1696104470342-b1ed3afe8381?w=800&h=600&fit=crop', // Man swinging on course
+  'https://images.unsplash.com/photo-1523982765444-622af25647b8?w=800&h=600&fit=crop', // Golf bag with clubs
+  'https://images.unsplash.com/photo-1752079313939-f78035c54fed?w=800&h=600&fit=crop', // Golf course sign hole eleven
+  // More course views
+  'https://images.unsplash.com/photo-1670254723853-70b07df01b41?w=800&h=600&fit=crop', // Person playing golf
+  'https://images.unsplash.com/photo-1724889753212-a0054d2c5d29?w=800&h=600&fit=crop', // Man hitting golf ball
+  'https://images.unsplash.com/photo-1521927336940-cae6e9f22945?w=800&h=600&fit=crop', // Aerial golf course mountains
+  'https://images.unsplash.com/photo-1743185836009-848e5035422b?w=800&h=600&fit=crop', // Sunset over golf course
+  'https://images.unsplash.com/photo-1693572709450-8c1be5b360c4?w=800&h=600&fit=crop', // Aerial golf course sunset
+  'https://images.unsplash.com/photo-1665961249026-41261c537184?w=800&h=600&fit=crop', // Waterfall in golf course
+  'https://images.unsplash.com/photo-1700667315345-e0c51587b2fd?w=800&h=600&fit=crop', // Golf course surrounded by trees
+  'https://images.unsplash.com/photo-1641249300414-7a4f01709382?w=800&h=600&fit=crop', // Aerial golf course in water
+  'https://images.unsplash.com/photo-1683169285928-eb93b0169793?w=800&h=600&fit=crop', // Aerial golf course on ocean
+  'https://images.unsplash.com/photo-1701020832735-20db45473441?w=800&h=600&fit=crop', // Golf course with palm trees
+  'https://images.unsplash.com/photo-1746695086529-3b478aa3fe23?w=800&h=600&fit=crop', // Miniature golf with palm tree
+  'https://images.unsplash.com/photo-1694720971856-a5fb5da97173?w=800&h=600&fit=crop', // Golf course with mountains
 ];
 
 // Function to get a golf image by index
