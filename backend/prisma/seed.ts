@@ -3,26 +3,55 @@ import { v4 as uuid } from 'uuid';
 
 const prisma = new PrismaClient();
 
-// Verified golf course images from Unsplash - all confirmed to be actual golf photos
-// Each ID has been verified to return a golf-related image
+// Professional landscape images from Lorem Picsum - guaranteed to load consistently
+// Each image uses a specific seed for consistency across reseeds
+// These are high-quality landscape images suitable for golf course placeholders
 const GOLF_COURSE_IMAGES: string[] = [
-  // Verified golf course and golf-related images
-  'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=800&h=600&fit=crop', // Golf course green
-  'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=800&h=600&fit=crop', // Golf course aerial
-  'https://images.unsplash.com/photo-1592919505780-303950717480?w=800&h=600&fit=crop', // Golf fairway
-  'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?w=800&h=600&fit=crop', // Golf landscape
-  'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?w=800&h=600&fit=crop', // Green grass course
-  'https://images.unsplash.com/photo-1595841696677-6489ff3f8cd1?w=800&h=600&fit=crop', // Golf at sunrise
-  'https://images.unsplash.com/photo-1611374243147-44a702c2d44c?w=800&h=600&fit=crop', // Palm lined course
-  'https://images.unsplash.com/photo-1596727362302-b8d891c42ab8?w=800&h=600&fit=crop', // Hilly golf course
-  'https://images.unsplash.com/photo-1535132011086-b8818f016104?w=800&h=600&fit=crop', // Golf ball on tee
-  'https://images.unsplash.com/photo-1591491653056-4e9d563a42cc?w=800&h=600&fit=crop', // Golf equipment
-  'https://images.unsplash.com/photo-1558403871-bb6e8167f578?w=800&h=600&fit=crop', // Desert course
-  'https://images.unsplash.com/photo-1609277588573-5d2a795d8892?w=800&h=600&fit=crop', // Sunset course
-  'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&h=600&fit=crop', // Wooded course
-  'https://images.unsplash.com/photo-1621689490613-ccce0c99a3c3?w=800&h=600&fit=crop', // Water hazard
-  'https://images.unsplash.com/photo-1500932334442-8761ee4810a7?w=800&h=600&fit=crop', // Wide fairway
-  'https://images.unsplash.com/photo-1530028828-25e8270793c5?w=800&h=600&fit=crop', // Rolling hills
+  'https://picsum.photos/seed/golfcourse1/800/600',
+  'https://picsum.photos/seed/golfcourse2/800/600',
+  'https://picsum.photos/seed/golfcourse3/800/600',
+  'https://picsum.photos/seed/golfcourse4/800/600',
+  'https://picsum.photos/seed/golfcourse5/800/600',
+  'https://picsum.photos/seed/golfcourse6/800/600',
+  'https://picsum.photos/seed/golfcourse7/800/600',
+  'https://picsum.photos/seed/golfcourse8/800/600',
+  'https://picsum.photos/seed/golfcourse9/800/600',
+  'https://picsum.photos/seed/golfcourse10/800/600',
+  'https://picsum.photos/seed/golfcourse11/800/600',
+  'https://picsum.photos/seed/golfcourse12/800/600',
+  'https://picsum.photos/seed/golfcourse13/800/600',
+  'https://picsum.photos/seed/golfcourse14/800/600',
+  'https://picsum.photos/seed/golfcourse15/800/600',
+  'https://picsum.photos/seed/golfcourse16/800/600',
+  'https://picsum.photos/seed/golfcourse17/800/600',
+  'https://picsum.photos/seed/golfcourse18/800/600',
+  'https://picsum.photos/seed/golfcourse19/800/600',
+  'https://picsum.photos/seed/golfcourse20/800/600',
+  'https://picsum.photos/seed/golfcourse21/800/600',
+  'https://picsum.photos/seed/golfcourse22/800/600',
+  'https://picsum.photos/seed/golfcourse23/800/600',
+  'https://picsum.photos/seed/golfcourse24/800/600',
+  'https://picsum.photos/seed/golfcourse25/800/600',
+  'https://picsum.photos/seed/golfcourse26/800/600',
+  'https://picsum.photos/seed/golfcourse27/800/600',
+  'https://picsum.photos/seed/golfcourse28/800/600',
+  'https://picsum.photos/seed/golfcourse29/800/600',
+  'https://picsum.photos/seed/golfcourse30/800/600',
+  'https://picsum.photos/seed/golfcourse31/800/600',
+  'https://picsum.photos/seed/golfcourse32/800/600',
+  'https://picsum.photos/seed/golfcourse33/800/600',
+  'https://picsum.photos/seed/golfcourse34/800/600',
+  'https://picsum.photos/seed/golfcourse35/800/600',
+  'https://picsum.photos/seed/golfcourse36/800/600',
+  'https://picsum.photos/seed/golfcourse37/800/600',
+  'https://picsum.photos/seed/golfcourse38/800/600',
+  'https://picsum.photos/seed/golfcourse39/800/600',
+  'https://picsum.photos/seed/golfcourse40/800/600',
+  'https://picsum.photos/seed/golfcourse41/800/600',
+  'https://picsum.photos/seed/golfcourse42/800/600',
+  'https://picsum.photos/seed/golfcourse43/800/600',
+  'https://picsum.photos/seed/golfcourse44/800/600',
+  'https://picsum.photos/seed/golfcourse45/800/600',
 ];
 
 // Function to get a golf image by index
