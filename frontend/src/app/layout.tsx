@@ -89,6 +89,15 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${dmSans.variable} ${jetbrains.variable}`}
     >
+      <head>
+        {/* Leaflet CSS - load early to prevent map styling issues */}
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+          integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="bg-secondary text-text antialiased">
         <Providers>{children}</Providers>
       </body>

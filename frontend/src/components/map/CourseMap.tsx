@@ -151,8 +151,11 @@ export function CourseMap({
 
   const zoom = initialZoom || DEFAULT_MAP_ZOOM;
 
-  // Loading state
-  if (!isMounted) {
+  // Check if icons are ready
+  const iconsReady = customIcon !== null && selectedIcon !== null;
+
+  // Loading state - wait for both mount and icons
+  if (!isMounted || !iconsReady) {
     return (
       <div className={cn('flex items-center justify-center bg-secondary', className)}>
         <div className="text-center p-8">
@@ -179,14 +182,6 @@ export function CourseMap({
 
   return (
     <div className={cn('relative', className)}>
-      {/* Import Leaflet CSS */}
-      <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
-        integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
-        crossOrigin="anonymous"
-      />
-
       <MapContainer
         center={center}
         zoom={zoom}
@@ -211,16 +206,16 @@ export function CourseMap({
           mapRef={mapRef}
         />
 
-        {/* Course markers */}
-        {markers.map((marker) => {
+        {/* Course markers - only render if we have valid coordinates */}
+        {markers.filter(m => m.lat && m.lng).map((marker) => {
           const isSelected = marker.id === selectedMarkerId;
-          const icon = isSelected ? selectedIcon : customIcon;
+          const icon = isSelected ? selectedIcon! : customIcon!;
 
           return (
             <Marker
               key={marker.id}
               position={[marker.lat, marker.lng]}
-              icon={icon || undefined}
+              icon={icon}
               eventHandlers={{
                 click: () => onMarkerClick?.(marker),
               }}

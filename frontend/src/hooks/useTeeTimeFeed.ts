@@ -13,9 +13,9 @@ export function useTeeTimeFeed(filters: FeedFilters = {}) {
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.pagination?.nextCursor ?? undefined,
-    staleTime: 30000, // 30 seconds
+    staleTime: 60000, // 1 minute
     gcTime: 300000, // 5 minutes
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   });
 }
 
