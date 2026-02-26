@@ -33,9 +33,9 @@ export default function FeedPage() {
 
   const joinMutation = useJoinTeeTime();
 
-  // WebSocket for real-time updates
+  // WebSocket for real-time updates (disabled - server not configured)
   useWebSocket({
-    enabled: true,
+    enabled: false,
     onNewTeeTime: () => {
       refetch();
     },
