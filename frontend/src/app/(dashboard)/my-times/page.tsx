@@ -94,8 +94,14 @@ function UpcomingTeeTimes() {
   useEffect(() => {
     async function fetchTeeTimes() {
       try {
+        console.log('[MyTimes] Fetching tee times for user:', user?.id);
         const response = await api.getUserTeeTimes();
+        console.log('[MyTimes] API response:', response);
+
         if (response.success && response.data) {
+          console.log('[MyTimes] Raw tee times count:', response.data.length);
+          console.log('[MyTimes] Raw tee times:', response.data);
+
           const now = new Date();
           // Filter to upcoming tee times where user has joined (not just hosted)
           // Note: API returns slot.user (object) not slot.userId, and tt.host (object) not tt.hostId
@@ -104,17 +110,26 @@ function UpcomingTeeTimes() {
             const isUpcoming = teeTimeDate > now;
             const hasJoined = tt.slots?.some(slot => slot.user?.id === user?.id);
             const isHost = tt.host?.id === user?.id;
+            console.log('[MyTimes] TeeTime:', tt.id, 'isUpcoming:', isUpcoming, 'hasJoined:', hasJoined, 'isHost:', isHost, 'host.id:', tt.host?.id, 'user.id:', user?.id);
             return isUpcoming && (hasJoined || isHost);
           });
+          console.log('[MyTimes] Filtered upcoming count:', upcoming.length);
           setTeeTimes(upcoming);
+        } else {
+          console.log('[MyTimes] API response not successful or no data:', response);
         }
       } catch (err) {
-        console.error('Failed to fetch tee times:', err);
+        console.error('[MyTimes] Failed to fetch tee times:', err);
       } finally {
         setIsLoading(false);
       }
     }
-    if (user) fetchTeeTimes();
+    if (user) {
+      fetchTeeTimes();
+    } else {
+      console.log('[MyTimes] No user, skipping fetch');
+      setIsLoading(false);
+    }
   }, [user]);
 
   if (isLoading) {
@@ -153,19 +168,26 @@ function HostedTeeTimes() {
   useEffect(() => {
     async function fetchTeeTimes() {
       try {
+        console.log('[HostedTimes] Fetching for user:', user?.id);
         const response = await api.getUserTeeTimes();
+        console.log('[HostedTimes] API response:', response);
+
         if (response.success && response.data) {
           const now = new Date();
           // Filter to tee times hosted by the current user
           // Note: API returns tt.host (object) not tt.hostId
           const hosted = response.data.filter(tt => {
             const teeTimeDate = new Date(tt.dateTime);
-            return tt.host?.id === user?.id && teeTimeDate > now;
+            const isHost = tt.host?.id === user?.id;
+            const isFuture = teeTimeDate > now;
+            console.log('[HostedTimes] TeeTime:', tt.id, 'host.id:', tt.host?.id, 'user.id:', user?.id, 'isHost:', isHost, 'isFuture:', isFuture);
+            return isHost && isFuture;
           });
+          console.log('[HostedTimes] Filtered hosted count:', hosted.length);
           setTeeTimes(hosted);
         }
       } catch (err) {
-        console.error('Failed to fetch tee times:', err);
+        console.error('[HostedTimes] Failed to fetch tee times:', err);
       } finally {
         setIsLoading(false);
       }
