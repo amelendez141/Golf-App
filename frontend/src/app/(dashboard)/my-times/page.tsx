@@ -98,11 +98,13 @@ function UpcomingTeeTimes() {
         if (response.success && response.data) {
           const now = new Date();
           // Filter to upcoming tee times where user has joined (not just hosted)
+          // Note: API returns slot.user (object) not slot.userId, and tt.host (object) not tt.hostId
           const upcoming = response.data.filter(tt => {
             const teeTimeDate = new Date(tt.dateTime);
             const isUpcoming = teeTimeDate > now;
-            const hasJoined = tt.slots?.some(slot => slot.userId === user?.id);
-            return isUpcoming && (hasJoined || tt.hostId === user?.id);
+            const hasJoined = tt.slots?.some(slot => slot.user?.id === user?.id);
+            const isHost = tt.host?.id === user?.id;
+            return isUpcoming && (hasJoined || isHost);
           });
           setTeeTimes(upcoming);
         }
@@ -155,9 +157,10 @@ function HostedTeeTimes() {
         if (response.success && response.data) {
           const now = new Date();
           // Filter to tee times hosted by the current user
+          // Note: API returns tt.host (object) not tt.hostId
           const hosted = response.data.filter(tt => {
             const teeTimeDate = new Date(tt.dateTime);
-            return tt.hostId === user?.id && teeTimeDate > now;
+            return tt.host?.id === user?.id && teeTimeDate > now;
           });
           setTeeTimes(hosted);
         }
@@ -252,7 +255,8 @@ function PastTeeTimes() {
 
 function TeeTimeCard({ teeTime, isHosted, isPast }: { teeTime: TeeTime; isHosted?: boolean; isPast?: boolean }) {
   const dateTime = new Date(teeTime.dateTime);
-  const filledSlots = teeTime.slots?.filter(s => s.userId).length || 0;
+  // Note: API returns slot.user (object) not slot.userId
+  const filledSlots = teeTime.slots?.filter(s => s.user).length || 0;
 
   return (
     <Link href={`/tee-time/${teeTime.id}`}>
