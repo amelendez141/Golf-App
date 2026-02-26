@@ -1,13 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '@/components/layout/Container';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
+import { api } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import type { TeeTime } from '@/lib/types';
 
 type TabType = 'upcoming' | 'hosted' | 'past';
 
@@ -83,45 +87,246 @@ export default function MyTimesPage() {
 }
 
 function UpcomingTeeTimes() {
-  // Mock empty state
-  return (
-    <EmptyState
-      icon={<CalendarIcon className="h-12 w-12" />}
-      title="No upcoming tee times"
-      description="You haven't joined any tee times yet. Browse the feed to find groups to play with."
-      action={
-        <Link href="/feed">
-          <Button>Browse Tee Times</Button>
-        </Link>
+  const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    async function fetchTeeTimes() {
+      try {
+        const response = await api.getUserTeeTimes();
+        if (response.success && response.data) {
+          const now = new Date();
+          // Filter to upcoming tee times where user has joined (not just hosted)
+          const upcoming = response.data.filter(tt => {
+            const teeTimeDate = new Date(tt.dateTime);
+            const isUpcoming = teeTimeDate > now;
+            const hasJoined = tt.slots?.some(slot => slot.userId === user?.id);
+            return isUpcoming && (hasJoined || tt.hostId === user?.id);
+          });
+          setTeeTimes(upcoming);
+        }
+      } catch (err) {
+        console.error('Failed to fetch tee times:', err);
+      } finally {
+        setIsLoading(false);
       }
-    />
+    }
+    if (user) fetchTeeTimes();
+  }, [user]);
+
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  if (teeTimes.length === 0) {
+    return (
+      <EmptyState
+        icon={<CalendarIcon className="h-12 w-12" />}
+        title="No upcoming tee times"
+        description="You haven't joined any tee times yet. Browse the feed to find groups to play with."
+        action={
+          <Link href="/feed">
+            <Button>Browse Tee Times</Button>
+          </Link>
+        }
+      />
+    );
+  }
+
+  return (
+    <div className="grid gap-4">
+      {teeTimes.map((teeTime) => (
+        <TeeTimeCard key={teeTime.id} teeTime={teeTime} />
+      ))}
+    </div>
   );
 }
 
 function HostedTeeTimes() {
-  return (
-    <EmptyState
-      icon={<GolfIcon className="h-12 w-12" />}
-      title="No hosted tee times"
-      description="You haven't posted any tee times yet. Create one to find playing partners."
-      action={
-        <Link href="/post">
-          <Button leftIcon={<PlusIcon className="h-4 w-4" />}>
-            Post Tee Time
-          </Button>
-        </Link>
+  const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    async function fetchTeeTimes() {
+      try {
+        const response = await api.getUserTeeTimes();
+        if (response.success && response.data) {
+          const now = new Date();
+          // Filter to tee times hosted by the current user
+          const hosted = response.data.filter(tt => {
+            const teeTimeDate = new Date(tt.dateTime);
+            return tt.hostId === user?.id && teeTimeDate > now;
+          });
+          setTeeTimes(hosted);
+        }
+      } catch (err) {
+        console.error('Failed to fetch tee times:', err);
+      } finally {
+        setIsLoading(false);
       }
-    />
+    }
+    if (user) fetchTeeTimes();
+  }, [user]);
+
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  if (teeTimes.length === 0) {
+    return (
+      <EmptyState
+        icon={<GolfIcon className="h-12 w-12" />}
+        title="No hosted tee times"
+        description="You haven't posted any tee times yet. Create one to find playing partners."
+        action={
+          <Link href="/post">
+            <Button leftIcon={<PlusIcon className="h-4 w-4" />}>
+              Post Tee Time
+            </Button>
+          </Link>
+        }
+      />
+    );
+  }
+
+  return (
+    <div className="grid gap-4">
+      {teeTimes.map((teeTime) => (
+        <TeeTimeCard key={teeTime.id} teeTime={teeTime} isHosted />
+      ))}
+    </div>
   );
 }
 
 function PastTeeTimes() {
+  const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    async function fetchTeeTimes() {
+      try {
+        const response = await api.getUserTeeTimes();
+        if (response.success && response.data) {
+          const now = new Date();
+          // Filter to past tee times
+          const past = response.data.filter(tt => {
+            const teeTimeDate = new Date(tt.dateTime);
+            return teeTimeDate <= now;
+          });
+          setTeeTimes(past);
+        }
+      } catch (err) {
+        console.error('Failed to fetch tee times:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    if (user) fetchTeeTimes();
+  }, [user]);
+
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  if (teeTimes.length === 0) {
+    return (
+      <EmptyState
+        icon={<ClockIcon className="h-12 w-12" />}
+        title="No past rounds"
+        description="Your completed rounds will appear here. Start by joining a tee time!"
+      />
+    );
+  }
+
   return (
-    <EmptyState
-      icon={<ClockIcon className="h-12 w-12" />}
-      title="No past rounds"
-      description="Your completed rounds will appear here. Start by joining a tee time!"
-    />
+    <div className="grid gap-4">
+      {teeTimes.map((teeTime) => (
+        <TeeTimeCard key={teeTime.id} teeTime={teeTime} isPast />
+      ))}
+    </div>
+  );
+}
+
+function TeeTimeCard({ teeTime, isHosted, isPast }: { teeTime: TeeTime; isHosted?: boolean; isPast?: boolean }) {
+  const dateTime = new Date(teeTime.dateTime);
+  const filledSlots = teeTime.slots?.filter(s => s.userId).length || 0;
+
+  return (
+    <Link href={`/tee-time/${teeTime.id}`}>
+      <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+        <div className="flex gap-4">
+          {/* Course Image */}
+          <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+            {teeTime.course?.imageUrl ? (
+              <Image
+                src={teeTime.course.imageUrl}
+                alt={teeTime.course.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                <GolfIcon className="h-8 w-8 text-primary/40" />
+              </div>
+            )}
+          </div>
+
+          {/* Details */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h3 className="font-semibold text-primary truncate">
+                  {teeTime.course?.name}
+                </h3>
+                <p className="text-sm text-text-muted">
+                  {teeTime.course?.city}, {teeTime.course?.state}
+                </p>
+              </div>
+              {isHosted && (
+                <Badge variant="accent" size="sm">Host</Badge>
+              )}
+              {isPast && (
+                <Badge variant="secondary" size="sm">Completed</Badge>
+              )}
+            </div>
+
+            <div className="mt-2 flex items-center gap-4 text-sm">
+              <span className="text-text-secondary">
+                {dateTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+              </span>
+              <span className="text-text-secondary">
+                {dateTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+              </span>
+              <span className="text-text-muted">
+                {filledSlots}/{teeTime.totalSlots} players
+              </span>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </Link>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map((i) => (
+        <Card key={i} className="p-4 animate-pulse">
+          <div className="flex gap-4">
+            <div className="w-24 h-24 rounded-lg bg-primary/10" />
+            <div className="flex-1 space-y-2">
+              <div className="h-5 bg-primary/10 rounded w-3/4" />
+              <div className="h-4 bg-primary/10 rounded w-1/2" />
+              <div className="h-4 bg-primary/10 rounded w-1/3" />
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
   );
 }
 
