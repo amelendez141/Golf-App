@@ -89,48 +89,49 @@ export default function MyTimesPage() {
 function UpcomingTeeTimes() {
   const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, isAuthenticated, token } = useAuth();
 
   useEffect(() => {
     async function fetchTeeTimes() {
+      setIsLoading(true);
       try {
-        console.log('[MyTimes] Fetching tee times for user:', user?.id);
+        console.log('[UpcomingTimes] Fetching for user:', user?.id, 'token exists:', !!token);
         const response = await api.getUserTeeTimes();
-        console.log('[MyTimes] API response:', response);
+        console.log('[UpcomingTimes] API response:', response);
 
         if (response.success && response.data) {
-          console.log('[MyTimes] Raw tee times count:', response.data.length);
-          console.log('[MyTimes] Raw tee times:', response.data);
+          console.log('[UpcomingTimes] Raw tee times count:', response.data.length);
 
           const now = new Date();
-          // Filter to upcoming tee times where user has joined (not just hosted)
-          // Note: API returns slot.user (object) not slot.userId, and tt.host (object) not tt.hostId
+          // API already filters to user's tee times - we just need to filter by date
           const upcoming = response.data.filter(tt => {
             const teeTimeDate = new Date(tt.dateTime);
             const isUpcoming = teeTimeDate > now;
-            const hasJoined = tt.slots?.some(slot => slot.user?.id === user?.id);
-            const isHost = tt.host?.id === user?.id;
-            console.log('[MyTimes] TeeTime:', tt.id, 'isUpcoming:', isUpcoming, 'hasJoined:', hasJoined, 'isHost:', isHost, 'host.id:', tt.host?.id, 'user.id:', user?.id);
-            return isUpcoming && (hasJoined || isHost);
+            console.log('[UpcomingTimes] TeeTime:', tt.id, 'date:', tt.dateTime, 'isUpcoming:', isUpcoming);
+            return isUpcoming;
           });
-          console.log('[MyTimes] Filtered upcoming count:', upcoming.length);
+          console.log('[UpcomingTimes] Filtered upcoming count:', upcoming.length);
           setTeeTimes(upcoming);
         } else {
-          console.log('[MyTimes] API response not successful or no data:', response);
+          console.log('[UpcomingTimes] API response not successful or no data:', response);
         }
       } catch (err) {
-        console.error('[MyTimes] Failed to fetch tee times:', err);
+        console.error('[UpcomingTimes] Failed to fetch tee times:', err);
       } finally {
         setIsLoading(false);
       }
     }
-    if (user) {
+
+    // Wait for auth to be ready (token exists means store is hydrated)
+    if (isAuthenticated && token) {
       fetchTeeTimes();
-    } else {
-      console.log('[MyTimes] No user, skipping fetch');
+    } else if (!isAuthenticated && !token) {
+      // Not authenticated, no need to show loading forever
+      console.log('[UpcomingTimes] Not authenticated');
       setIsLoading(false);
     }
-  }, [user]);
+    // If isAuthenticated but no token yet, keep loading (store hydrating)
+  }, [user, isAuthenticated, token]);
 
   if (isLoading) {
     return <LoadingState />;
@@ -163,10 +164,11 @@ function UpcomingTeeTimes() {
 function HostedTeeTimes() {
   const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, isAuthenticated, token } = useAuth();
 
   useEffect(() => {
     async function fetchTeeTimes() {
+      setIsLoading(true);
       try {
         console.log('[HostedTimes] Fetching for user:', user?.id);
         const response = await api.getUserTeeTimes();
@@ -174,13 +176,12 @@ function HostedTeeTimes() {
 
         if (response.success && response.data) {
           const now = new Date();
-          // Filter to tee times hosted by the current user
-          // Note: API returns tt.host (object) not tt.hostId
+          // Filter to tee times where user is the host (future only)
           const hosted = response.data.filter(tt => {
             const teeTimeDate = new Date(tt.dateTime);
             const isHost = tt.host?.id === user?.id;
             const isFuture = teeTimeDate > now;
-            console.log('[HostedTimes] TeeTime:', tt.id, 'host.id:', tt.host?.id, 'user.id:', user?.id, 'isHost:', isHost, 'isFuture:', isFuture);
+            console.log('[HostedTimes] TeeTime:', tt.id, 'isHost:', isHost, 'isFuture:', isFuture);
             return isHost && isFuture;
           });
           console.log('[HostedTimes] Filtered hosted count:', hosted.length);
@@ -192,8 +193,13 @@ function HostedTeeTimes() {
         setIsLoading(false);
       }
     }
-    if (user) fetchTeeTimes();
-  }, [user]);
+
+    if (isAuthenticated && token) {
+      fetchTeeTimes();
+    } else if (!isAuthenticated && !token) {
+      setIsLoading(false);
+    }
+  }, [user, isAuthenticated, token]);
 
   if (isLoading) {
     return <LoadingState />;
@@ -228,10 +234,11 @@ function HostedTeeTimes() {
 function PastTeeTimes() {
   const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, isAuthenticated, token } = useAuth();
 
   useEffect(() => {
     async function fetchTeeTimes() {
+      setIsLoading(true);
       try {
         const response = await api.getUserTeeTimes();
         if (response.success && response.data) {
@@ -244,13 +251,18 @@ function PastTeeTimes() {
           setTeeTimes(past);
         }
       } catch (err) {
-        console.error('Failed to fetch tee times:', err);
+        console.error('[PastTimes] Failed to fetch tee times:', err);
       } finally {
         setIsLoading(false);
       }
     }
-    if (user) fetchTeeTimes();
-  }, [user]);
+
+    if (isAuthenticated && token) {
+      fetchTeeTimes();
+    } else if (!isAuthenticated && !token) {
+      setIsLoading(false);
+    }
+  }, [user, isAuthenticated, token]);
 
   if (isLoading) {
     return <LoadingState />;
