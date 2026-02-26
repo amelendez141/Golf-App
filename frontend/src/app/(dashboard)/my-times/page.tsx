@@ -89,34 +89,33 @@ export default function MyTimesPage() {
 function UpcomingTeeTimes() {
   const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [debugInfo, setDebugInfo] = useState<string>('Initializing...');
   const { user, isAuthenticated, token } = useAuth();
 
   useEffect(() => {
     async function fetchTeeTimes() {
       setIsLoading(true);
+      setDebugInfo(`Fetching... user=${user?.id}, hasToken=${!!token}`);
       try {
-        console.log('[UpcomingTimes] Fetching for user:', user?.id, 'token exists:', !!token);
         const response = await api.getUserTeeTimes();
-        console.log('[UpcomingTimes] API response:', response);
 
         if (response.success && response.data) {
-          console.log('[UpcomingTimes] Raw tee times count:', response.data.length);
-
           const now = new Date();
+          const rawCount = response.data.length;
+
           // API already filters to user's tee times - we just need to filter by date
           const upcoming = response.data.filter(tt => {
             const teeTimeDate = new Date(tt.dateTime);
-            const isUpcoming = teeTimeDate > now;
-            console.log('[UpcomingTimes] TeeTime:', tt.id, 'date:', tt.dateTime, 'isUpcoming:', isUpcoming);
-            return isUpcoming;
+            return teeTimeDate > now;
           });
-          console.log('[UpcomingTimes] Filtered upcoming count:', upcoming.length);
+
+          setDebugInfo(`API returned ${rawCount} tee times, ${upcoming.length} are upcoming. User ID: ${user?.id}`);
           setTeeTimes(upcoming);
         } else {
-          console.log('[UpcomingTimes] API response not successful or no data:', response);
+          setDebugInfo(`API error or no data: ${JSON.stringify(response)}`);
         }
       } catch (err) {
-        console.error('[UpcomingTimes] Failed to fetch tee times:', err);
+        setDebugInfo(`Fetch error: ${err instanceof Error ? err.message : 'Unknown error'}`);
       } finally {
         setIsLoading(false);
       }
@@ -126,11 +125,11 @@ function UpcomingTeeTimes() {
     if (isAuthenticated && token) {
       fetchTeeTimes();
     } else if (!isAuthenticated && !token) {
-      // Not authenticated, no need to show loading forever
-      console.log('[UpcomingTimes] Not authenticated');
+      setDebugInfo('Not authenticated - no token');
       setIsLoading(false);
+    } else {
+      setDebugInfo(`Waiting for auth: isAuthenticated=${isAuthenticated}, hasToken=${!!token}`);
     }
-    // If isAuthenticated but no token yet, keep loading (store hydrating)
   }, [user, isAuthenticated, token]);
 
   if (isLoading) {
@@ -139,16 +138,22 @@ function UpcomingTeeTimes() {
 
   if (teeTimes.length === 0) {
     return (
-      <EmptyState
-        icon={<CalendarIcon className="h-12 w-12" />}
-        title="No upcoming tee times"
-        description="You haven't joined any tee times yet. Browse the feed to find groups to play with."
-        action={
-          <Link href="/feed">
-            <Button>Browse Tee Times</Button>
-          </Link>
-        }
-      />
+      <>
+        {/* Debug info - remove after fixing */}
+        <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 rounded text-sm text-yellow-800">
+          <strong>Debug:</strong> {debugInfo}
+        </div>
+        <EmptyState
+          icon={<CalendarIcon className="h-12 w-12" />}
+          title="No upcoming tee times"
+          description="You haven't joined any tee times yet. Browse the feed to find groups to play with."
+          action={
+            <Link href="/feed">
+              <Button>Browse Tee Times</Button>
+            </Link>
+          }
+        />
+      </>
     );
   }
 
