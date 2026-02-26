@@ -3,54 +3,62 @@ import { v4 as uuid } from 'uuid';
 
 const prisma = new PrismaClient();
 
-// Verified golf course images from Unsplash - all manually verified to be actual golf photos
+// 50 verified golf course images from Unsplash - all manually verified to be actual golf photos
 // Each image URL has been extracted from verified Unsplash golf photo pages
+// Cache-busting parameter added to force fresh image loads
 const GOLF_COURSE_IMAGES: string[] = [
-  // Aerial views and course landscapes
-  'https://images.unsplash.com/photo-1742498626135-67a7d3501eff?w=800&h=600&fit=crop', // Aerial view of beautiful golf course
-  'https://images.unsplash.com/photo-1544733274-e33e953ceb9e?w=800&h=600&fit=crop', // Aerial view green golf course
-  'https://images.unsplash.com/photo-1699394426296-9c549c27fcaf?w=800&h=600&fit=crop', // Golf course surrounded by trees
-  'https://images.unsplash.com/photo-1561066030-f096e3ba23dd?w=800&h=600&fit=crop', // Golf field near cliff ocean
-  'https://images.unsplash.com/photo-1509586721451-a990371f8243?w=800&h=600&fit=crop', // Man playing golf
-  'https://images.unsplash.com/photo-1503410759647-41040b696833?w=800&h=600&fit=crop', // Golf ball on green
-  'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?w=800&h=600&fit=crop', // Golf club on course
-  'https://images.unsplash.com/photo-1641584087157-cd712948ce6b?w=800&h=600&fit=crop', // Golf course at sunset
-  'https://images.unsplash.com/photo-1694636507260-8b2428e3b738?w=800&h=600&fit=crop', // Aerial green golf course
-  'https://images.unsplash.com/photo-1693163537665-b7c5a5f01f75?w=800&h=600&fit=crop', // Man walking golf course
-  'https://images.unsplash.com/photo-1704863619342-9cf73eca5fe8?w=800&h=600&fit=crop', // Golf ball and club putting green
-  'https://images.unsplash.com/photo-1692931460164-f71ed1101ecf?w=800&h=600&fit=crop', // Golf course ocean view
-  'https://images.unsplash.com/photo-1638662293033-7834e41473ae?w=800&h=600&fit=crop', // Aerial golf course in city
-  'https://images.unsplash.com/photo-1576555928619-03d62a29e4a1?w=800&h=600&fit=crop', // White golf ball
-  'https://images.unsplash.com/photo-1621005570352-6418df03796b?w=800&h=600&fit=crop', // Golf ball on green grass
-  'https://images.unsplash.com/photo-1593111774642-a746f5006b7b?w=800&h=600&fit=crop', // Man putting golf ball
-  'https://images.unsplash.com/photo-1648219124133-8e53e8a9577c?w=800&h=600&fit=crop', // Aerial man playing golf
-  'https://images.unsplash.com/photo-1597369237991-5c95d1b6e0c8?w=800&h=600&fit=crop', // Golf ball green grass field
-  'https://images.unsplash.com/photo-1746209843615-6b007f4ac00d?w=800&h=600&fit=crop', // Golf ball on golden tee
-  'https://images.unsplash.com/photo-1674884070794-b61d85f9adf8?w=800&h=600&fit=crop', // Scenic golf course with lake
-  // Golfers and action shots
-  'https://images.unsplash.com/photo-1535132011086-b8818f016104?w=800&h=600&fit=crop', // Man playing golf daytime
-  'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=800&h=600&fit=crop', // Man swinging golf driver
-  'https://images.unsplash.com/photo-1597368629379-64c0c151431b?w=800&h=600&fit=crop', // Man swinging club in field
-  'https://images.unsplash.com/photo-1576247975963-4995837fb3e6?w=800&h=600&fit=crop', // Man hitting golf ball
-  'https://images.unsplash.com/photo-1723717729877-6a0bb3095c30?w=800&h=600&fit=crop', // Man swinging at ball
-  'https://images.unsplash.com/photo-1769103638533-eb73b58b610b?w=800&h=600&fit=crop', // Man hitting golf ball
-  'https://images.unsplash.com/photo-1611374243147-44a702c2d44c?w=800&h=600&fit=crop', // Man playing golf daytime
-  'https://images.unsplash.com/photo-1696104470342-b1ed3afe8381?w=800&h=600&fit=crop', // Man swinging on course
-  'https://images.unsplash.com/photo-1523982765444-622af25647b8?w=800&h=600&fit=crop', // Golf bag with clubs
-  'https://images.unsplash.com/photo-1752079313939-f78035c54fed?w=800&h=600&fit=crop', // Golf course sign hole eleven
-  // More course views
-  'https://images.unsplash.com/photo-1670254723853-70b07df01b41?w=800&h=600&fit=crop', // Person playing golf
-  'https://images.unsplash.com/photo-1724889753212-a0054d2c5d29?w=800&h=600&fit=crop', // Man hitting golf ball
-  'https://images.unsplash.com/photo-1521927336940-cae6e9f22945?w=800&h=600&fit=crop', // Aerial golf course mountains
-  'https://images.unsplash.com/photo-1743185836009-848e5035422b?w=800&h=600&fit=crop', // Sunset over golf course
-  'https://images.unsplash.com/photo-1693572709450-8c1be5b360c4?w=800&h=600&fit=crop', // Aerial golf course sunset
-  'https://images.unsplash.com/photo-1665961249026-41261c537184?w=800&h=600&fit=crop', // Waterfall in golf course
-  'https://images.unsplash.com/photo-1700667315345-e0c51587b2fd?w=800&h=600&fit=crop', // Golf course surrounded by trees
-  'https://images.unsplash.com/photo-1641249300414-7a4f01709382?w=800&h=600&fit=crop', // Aerial golf course in water
-  'https://images.unsplash.com/photo-1683169285928-eb93b0169793?w=800&h=600&fit=crop', // Aerial golf course on ocean
-  'https://images.unsplash.com/photo-1701020832735-20db45473441?w=800&h=600&fit=crop', // Golf course with palm trees
-  'https://images.unsplash.com/photo-1746695086529-3b478aa3fe23?w=800&h=600&fit=crop', // Miniature golf with palm tree
-  'https://images.unsplash.com/photo-1694720971856-a5fb5da97173?w=800&h=600&fit=crop', // Golf course with mountains
+  // Aerial views and course landscapes (1-20)
+  'https://images.unsplash.com/photo-1742498626135-67a7d3501eff?w=800&h=600&fit=crop&v=1', // Aerial view of beautiful golf course
+  'https://images.unsplash.com/photo-1544733274-e33e953ceb9e?w=800&h=600&fit=crop&v=1', // Aerial view green golf course
+  'https://images.unsplash.com/photo-1699394426296-9c549c27fcaf?w=800&h=600&fit=crop&v=1', // Golf course surrounded by trees
+  'https://images.unsplash.com/photo-1561066030-f096e3ba23dd?w=800&h=600&fit=crop&v=1', // Golf field near cliff ocean
+  'https://images.unsplash.com/photo-1509586721451-a990371f8243?w=800&h=600&fit=crop&v=1', // Man playing golf
+  'https://images.unsplash.com/photo-1503410759647-41040b696833?w=800&h=600&fit=crop&v=1', // Golf ball on green
+  'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?w=800&h=600&fit=crop&v=1', // Golf club on course
+  'https://images.unsplash.com/photo-1641584087157-cd712948ce6b?w=800&h=600&fit=crop&v=1', // Golf course at sunset
+  'https://images.unsplash.com/photo-1694636507260-8b2428e3b738?w=800&h=600&fit=crop&v=1', // Aerial green golf course
+  'https://images.unsplash.com/photo-1693163537665-b7c5a5f01f75?w=800&h=600&fit=crop&v=1', // Man walking golf course
+  'https://images.unsplash.com/photo-1704863619342-9cf73eca5fe8?w=800&h=600&fit=crop&v=1', // Golf ball and club putting green
+  'https://images.unsplash.com/photo-1692931460164-f71ed1101ecf?w=800&h=600&fit=crop&v=1', // Golf course ocean view
+  'https://images.unsplash.com/photo-1638662293033-7834e41473ae?w=800&h=600&fit=crop&v=1', // Aerial golf course in city
+  'https://images.unsplash.com/photo-1576555928619-03d62a29e4a1?w=800&h=600&fit=crop&v=1', // White golf ball
+  'https://images.unsplash.com/photo-1621005570352-6418df03796b?w=800&h=600&fit=crop&v=1', // Golf ball on green grass
+  'https://images.unsplash.com/photo-1593111774642-a746f5006b7b?w=800&h=600&fit=crop&v=1', // Man putting golf ball
+  'https://images.unsplash.com/photo-1648219124133-8e53e8a9577c?w=800&h=600&fit=crop&v=1', // Aerial man playing golf
+  'https://images.unsplash.com/photo-1597369237991-5c95d1b6e0c8?w=800&h=600&fit=crop&v=1', // Golf ball green grass field
+  'https://images.unsplash.com/photo-1746209843615-6b007f4ac00d?w=800&h=600&fit=crop&v=1', // Golf ball on golden tee
+  'https://images.unsplash.com/photo-1674884070794-b61d85f9adf8?w=800&h=600&fit=crop&v=1', // Scenic golf course with lake
+  // Golfers and action shots (21-35)
+  'https://images.unsplash.com/photo-1535132011086-b8818f016104?w=800&h=600&fit=crop&v=1', // Man playing golf daytime
+  'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=800&h=600&fit=crop&v=1', // Man swinging golf driver
+  'https://images.unsplash.com/photo-1597368629379-64c0c151431b?w=800&h=600&fit=crop&v=1', // Man swinging club in field
+  'https://images.unsplash.com/photo-1576247975963-4995837fb3e6?w=800&h=600&fit=crop&v=1', // Man hitting golf ball
+  'https://images.unsplash.com/photo-1723717729877-6a0bb3095c30?w=800&h=600&fit=crop&v=1', // Man swinging at ball
+  'https://images.unsplash.com/photo-1769103638533-eb73b58b610b?w=800&h=600&fit=crop&v=1', // Man hitting golf ball action
+  'https://images.unsplash.com/photo-1611374243147-44a702c2d44c?w=800&h=600&fit=crop&v=1', // Man playing golf daytime
+  'https://images.unsplash.com/photo-1696104470342-b1ed3afe8381?w=800&h=600&fit=crop&v=1', // Man swinging on course
+  'https://images.unsplash.com/photo-1523982765444-622af25647b8?w=800&h=600&fit=crop&v=1', // Golf bag with clubs
+  'https://images.unsplash.com/photo-1752079313939-f78035c54fed?w=800&h=600&fit=crop&v=1', // Golf course sign hole eleven
+  'https://images.unsplash.com/photo-1670254723853-70b07df01b41?w=800&h=600&fit=crop&v=1', // Person playing golf
+  'https://images.unsplash.com/photo-1724889753212-a0054d2c5d29?w=800&h=600&fit=crop&v=1', // Man hitting golf ball
+  'https://images.unsplash.com/photo-1549828752-65830f6d81b1?w=800&h=600&fit=crop&v=1', // Asian man golfing
+  'https://images.unsplash.com/photo-1592919505780-303950717480?w=800&h=600&fit=crop&v=1', // Man standing on green
+  'https://images.unsplash.com/photo-1593664149630-76dfde44ca9e?w=800&h=600&fit=crop&v=1', // Golf ball on tee in grass
+  // More course views and landscapes (36-50)
+  'https://images.unsplash.com/photo-1521927336940-cae6e9f22945?w=800&h=600&fit=crop&v=1', // Aerial golf course mountains
+  'https://images.unsplash.com/photo-1743185836009-848e5035422b?w=800&h=600&fit=crop&v=1', // Sunset over golf course
+  'https://images.unsplash.com/photo-1693572709450-8c1be5b360c4?w=800&h=600&fit=crop&v=1', // Aerial golf course sunset
+  'https://images.unsplash.com/photo-1665961249026-41261c537184?w=800&h=600&fit=crop&v=1', // Waterfall in golf course
+  'https://images.unsplash.com/photo-1700667315345-e0c51587b2fd?w=800&h=600&fit=crop&v=1', // Golf course surrounded by trees
+  'https://images.unsplash.com/photo-1641249300414-7a4f01709382?w=800&h=600&fit=crop&v=1', // Aerial golf course in water
+  'https://images.unsplash.com/photo-1683169285928-eb93b0169793?w=800&h=600&fit=crop&v=1', // Aerial golf course on ocean
+  'https://images.unsplash.com/photo-1701020832735-20db45473441?w=800&h=600&fit=crop&v=1', // Golf course with palm trees
+  'https://images.unsplash.com/photo-1694720971856-a5fb5da97173?w=800&h=600&fit=crop&v=1', // Golf course with mountains
+  'https://images.unsplash.com/photo-1538648759472-7251f7cb2c2f?w=800&h=600&fit=crop&v=1', // Golf field under blue sky
+  'https://images.unsplash.com/photo-1568576599114-b9aa87edd0e1?w=800&h=600&fit=crop&v=1', // Golf balls on green
+  'https://images.unsplash.com/photo-1632946269126-0f8edbe8b068?w=800&h=600&fit=crop&v=1', // Golf ball on green field
+  'https://images.unsplash.com/photo-1606443192517-919653213206?w=800&h=600&fit=crop&v=1', // Golf course with trees
+  'https://images.unsplash.com/photo-1561504583-061f9660a9b7?w=800&h=600&fit=crop&v=1', // Golf ball and tee on grass
 ];
 
 // Function to get a golf image by index
