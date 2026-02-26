@@ -89,46 +89,40 @@ export default function MyTimesPage() {
 function UpcomingTeeTimes() {
   const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [debugInfo, setDebugInfo] = useState<string>('Initializing...');
   const { user, isAuthenticated, token } = useAuth();
 
   useEffect(() => {
     async function fetchTeeTimes() {
       setIsLoading(true);
-      setDebugInfo(`Fetching... user=${user?.id}, hasToken=${!!token}`);
       try {
         const response = await api.getUserTeeTimes();
 
         if (response.success && response.data) {
           const now = new Date();
-          const rawCount = response.data.length;
 
-          // API already filters to user's tee times - we just need to filter by date
+          // Filter to upcoming tee times where user has joined or is host
           const upcoming = response.data.filter(tt => {
             const teeTimeDate = new Date(tt.dateTime);
-            return teeTimeDate > now;
+            const isUpcoming = teeTimeDate > now;
+            // Check if user is host or has joined a slot
+            const isHost = tt.host?.id === user?.id;
+            const hasJoined = tt.slots?.some(slot => slot.user?.id === user?.id);
+            return isUpcoming && (isHost || hasJoined);
           });
 
-          setDebugInfo(`API returned ${rawCount} tee times, ${upcoming.length} are upcoming. User ID: ${user?.id}`);
           setTeeTimes(upcoming);
-        } else {
-          setDebugInfo(`API error or no data: ${JSON.stringify(response)}`);
         }
       } catch (err) {
-        setDebugInfo(`Fetch error: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        console.error('Failed to fetch tee times:', err);
       } finally {
         setIsLoading(false);
       }
     }
 
-    // Wait for auth to be ready (token exists means store is hydrated)
-    if (isAuthenticated && token) {
+    if (isAuthenticated && token && user) {
       fetchTeeTimes();
-    } else if (!isAuthenticated && !token) {
-      setDebugInfo('Not authenticated - no token');
+    } else if (!isAuthenticated) {
       setIsLoading(false);
-    } else {
-      setDebugInfo(`Waiting for auth: isAuthenticated=${isAuthenticated}, hasToken=${!!token}`);
     }
   }, [user, isAuthenticated, token]);
 
@@ -138,22 +132,16 @@ function UpcomingTeeTimes() {
 
   if (teeTimes.length === 0) {
     return (
-      <>
-        {/* Debug info - remove after fixing */}
-        <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 rounded text-sm text-yellow-800">
-          <strong>Debug:</strong> {debugInfo}
-        </div>
-        <EmptyState
-          icon={<CalendarIcon className="h-12 w-12" />}
-          title="No upcoming tee times"
-          description="You haven't joined any tee times yet. Browse the feed to find groups to play with."
-          action={
-            <Link href="/feed">
-              <Button>Browse Tee Times</Button>
-            </Link>
-          }
-        />
-      </>
+      <EmptyState
+        icon={<CalendarIcon className="h-12 w-12" />}
+        title="No upcoming tee times"
+        description="You haven't joined any tee times yet. Browse the feed to find groups to play with."
+        action={
+          <Link href="/feed">
+            <Button>Browse Tee Times</Button>
+          </Link>
+        }
+      />
     );
   }
 
@@ -175,9 +163,7 @@ function HostedTeeTimes() {
     async function fetchTeeTimes() {
       setIsLoading(true);
       try {
-        console.log('[HostedTimes] Fetching for user:', user?.id);
         const response = await api.getUserTeeTimes();
-        console.log('[HostedTimes] API response:', response);
 
         if (response.success && response.data) {
           const now = new Date();
@@ -186,22 +172,20 @@ function HostedTeeTimes() {
             const teeTimeDate = new Date(tt.dateTime);
             const isHost = tt.host?.id === user?.id;
             const isFuture = teeTimeDate > now;
-            console.log('[HostedTimes] TeeTime:', tt.id, 'isHost:', isHost, 'isFuture:', isFuture);
             return isHost && isFuture;
           });
-          console.log('[HostedTimes] Filtered hosted count:', hosted.length);
           setTeeTimes(hosted);
         }
       } catch (err) {
-        console.error('[HostedTimes] Failed to fetch tee times:', err);
+        console.error('Failed to fetch hosted tee times:', err);
       } finally {
         setIsLoading(false);
       }
     }
 
-    if (isAuthenticated && token) {
+    if (isAuthenticated && token && user) {
       fetchTeeTimes();
-    } else if (!isAuthenticated && !token) {
+    } else if (!isAuthenticated) {
       setIsLoading(false);
     }
   }, [user, isAuthenticated, token]);
