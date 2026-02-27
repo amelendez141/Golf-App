@@ -39,8 +39,11 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0 bg-hero-gradient grain-overlay" />
+        {/* Background - dark green gradient */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(135deg, #16352D 0%, #1B4D3E 50%, #16352D 100%)' }}
+        />
 
         <Container className="relative">
           <div className="flex flex-col items-center justify-center py-16 sm:py-24 md:py-32 lg:py-40 text-center px-2 sm:px-0">
