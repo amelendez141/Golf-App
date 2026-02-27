@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Badge, IndustryBadge, SkillBadge } from '@/components/ui/Badge';
+import { ProfileSkeleton } from '@/components/ui/Skeleton';
 import { GolfResume } from '@/components/profile';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -73,14 +74,7 @@ export default function ProfilePage() {
     return (
       <div className="py-4 sm:py-6 pb-24 sm:pb-6">
         <Container>
-          <div className="animate-pulse space-y-6">
-            <Card className="h-48" />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Card className="h-32" />
-              <Card className="h-32" />
-              <Card className="h-32" />
-            </div>
-          </div>
+          <ProfileSkeleton />
         </Container>
       </div>
     );

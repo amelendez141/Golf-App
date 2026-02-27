@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Container } from '@/components/layout/Container';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
+import { MessagesSkeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
 import type { TeeTime } from '@/lib/types';
@@ -44,27 +45,7 @@ export default function MessagesPage() {
     return (
       <div className="py-6">
         <Container>
-          <div className="mb-6">
-            <h1 className="font-serif text-2xl md:text-3xl font-bold text-primary mb-2">
-              Messages
-            </h1>
-            <p className="text-text-secondary">
-              Connect with your playing partners.
-            </p>
-          </div>
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="p-4 animate-pulse">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-primary/10 rounded w-2/3" />
-                    <div className="h-3 bg-primary/10 rounded w-1/2" />
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+          <MessagesSkeleton />
         </Container>
       </div>
     );

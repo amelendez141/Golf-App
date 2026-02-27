@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Dropdown } from '@/components/ui/Dropdown';
+import { SettingsSkeleton } from '@/components/ui/Skeleton';
 import { INDUSTRIES, SKILL_LEVELS } from '@/lib/constants';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/api';
@@ -146,11 +147,7 @@ export default function SettingsPage() {
     return (
       <div className="py-6">
         <Container size="md">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-primary/10 rounded w-1/3" />
-            <Card className="h-64" />
-            <Card className="h-48" />
-          </div>
+          <SettingsSkeleton />
         </Container>
       </div>
     );

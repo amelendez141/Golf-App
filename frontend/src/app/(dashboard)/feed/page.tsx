@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Container } from '@/components/layout/Container';
 import { TeeTimeCard } from '@/components/feed/TeeTimeCard';
 import { TeeTimeCardSkeletonList } from '@/components/feed/TeeTimeCardSkeleton';
+import { FeedSkeleton } from '@/components/ui/Skeleton';
 import { FeedFilters } from '@/components/feed/FeedFilters';
 import { EmptyFeed } from '@/components/feed/EmptyFeed';
 import { useTeeTimeFeed } from '@/hooks/useTeeTimeFeed';
