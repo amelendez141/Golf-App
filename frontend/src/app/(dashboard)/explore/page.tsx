@@ -40,6 +40,7 @@ export default function ExplorePage() {
   const [selectedMarker, setSelectedMarker] = useState<MapMarker | null>(null);
   const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [courseTeeTimeCounts, setCourseTeeTimeCounts] = useState<Record<string, { teeTimeCount: number; openSlots: number }>>({});
   const [mapFilters, setMapFilters] = useState<MapFilters>({
     courseType: 'all',
     availability: 'all',
@@ -55,33 +56,58 @@ export default function ExplorePage() {
     50 // Increased radius
   );
 
-  // Load all courses on mount (fallback when no location)
+  // Load all courses and tee times on mount
   useEffect(() => {
-    async function loadCourses() {
+    async function loadData() {
       try {
-        const response = await api.getCourses({ limit: 100 });
-        if (response.success && response.data) {
-          setAllCourses(response.data);
+        const [coursesResponse, teeTimesResponse] = await Promise.all([
+          api.getCourses({ limit: 100 }),
+          api.getTeeTimeFeed({ hasAvailableSlots: true }, undefined, 100),
+        ]);
+
+        if (coursesResponse.success && coursesResponse.data) {
+          setAllCourses(coursesResponse.data);
+        }
+
+        // Calculate tee time counts per course
+        if (teeTimesResponse.success && teeTimesResponse.data) {
+          const counts: Record<string, { teeTimeCount: number; openSlots: number }> = {};
+
+          teeTimesResponse.data.forEach((tt) => {
+            const courseId = tt.course?.id;
+            if (courseId) {
+              if (!counts[courseId]) {
+                counts[courseId] = { teeTimeCount: 0, openSlots: 0 };
+              }
+              counts[courseId].teeTimeCount++;
+              counts[courseId].openSlots += tt.availableSlots || 0;
+            }
+          });
+
+          setCourseTeeTimeCounts(counts);
         }
       } catch (err) {
-        console.error('Failed to load courses:', err);
+        console.error('Failed to load data:', err);
       }
     }
-    loadCourses();
+    loadData();
   }, []);
 
   // Use nearby courses if available, otherwise fall back to all courses
   const coursesToShow = nearbyCourses?.data?.length ? nearbyCourses.data : allCourses;
 
-  // Convert courses to map markers
-  const markers: MapMarker[] = coursesToShow.map((course: any) => ({
-    id: course.id,
-    lat: course.latitude,
-    lng: course.longitude,
-    course,
-    openSlots: Math.floor(Math.random() * 4), // Mock data
-    teeTimeCount: Math.floor(Math.random() * 5) + 1, // Mock data
-  }));
+  // Convert courses to map markers with real tee time data
+  const markers: MapMarker[] = coursesToShow.map((course: Course) => {
+    const courseStats = courseTeeTimeCounts[course.id] || { teeTimeCount: 0, openSlots: 0 };
+    return {
+      id: course.id,
+      lat: course.latitude,
+      lng: course.longitude,
+      course,
+      openSlots: courseStats.openSlots,
+      teeTimeCount: courseStats.teeTimeCount,
+    };
+  });
 
   // Filter markers based on mapFilters
   const filteredMarkers = useMemo(() => {

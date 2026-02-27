@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +17,69 @@ type TabType = 'upcoming' | 'hosted' | 'past';
 
 export default function MyTimesPage() {
   const [activeTab, setActiveTab] = useState<TabType>('upcoming');
+  const [allTeeTimes, setAllTeeTimes] = useState<TeeTime[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user, isAuthenticated, token } = useAuth();
+
+  // Fetch all tee times once
+  useEffect(() => {
+    async function fetchTeeTimes() {
+      if (!isAuthenticated || !token || !user) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await api.getUserTeeTimes();
+        if (response.success && response.data) {
+          setAllTeeTimes(response.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch tee times:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTeeTimes();
+  }, [user, isAuthenticated, token]);
+
+  // Memoized filtered lists
+  const now = new Date();
+
+  const upcomingTeeTimes = useMemo(() => {
+    return allTeeTimes.filter(tt => {
+      const teeTimeDate = new Date(tt.dateTime);
+      const isUpcoming = teeTimeDate > now;
+      const isHost = tt.host?.id === user?.id;
+      const hasJoined = tt.slots?.some(slot => slot.user?.id === user?.id);
+      return isUpcoming && (isHost || hasJoined);
+    });
+  }, [allTeeTimes, user?.id, now]);
+
+  const hostedTeeTimes = useMemo(() => {
+    return allTeeTimes.filter(tt => {
+      const teeTimeDate = new Date(tt.dateTime);
+      const isHost = tt.host?.id === user?.id;
+      const isFuture = teeTimeDate > now;
+      return isHost && isFuture;
+    });
+  }, [allTeeTimes, user?.id, now]);
+
+  const pastTeeTimes = useMemo(() => {
+    return allTeeTimes.filter(tt => {
+      const teeTimeDate = new Date(tt.dateTime);
+      return teeTimeDate <= now;
+    });
+  }, [allTeeTimes, now]);
+
+  // Get counts for badges
+  const counts = {
+    upcoming: upcomingTeeTimes.length,
+    hosted: hostedTeeTimes.length,
+    past: pastTeeTimes.length,
+  };
 
   return (
     <div className="py-6">
@@ -41,15 +104,15 @@ export default function MyTimesPage() {
         {/* Tabs with animated indicator */}
         <div className="flex gap-1 p-1 bg-secondary-200 rounded-lg w-fit mb-6 relative">
           {[
-            { id: 'upcoming' as TabType, label: 'Upcoming' },
-            { id: 'hosted' as TabType, label: 'Hosted' },
-            { id: 'past' as TabType, label: 'Past' },
+            { id: 'upcoming' as TabType, label: 'Upcoming', count: counts.upcoming },
+            { id: 'hosted' as TabType, label: 'Hosted', count: counts.hosted },
+            { id: 'past' as TabType, label: 'Past', count: counts.past },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'relative px-4 py-2 text-sm font-medium rounded-md transition-colors z-10',
+                'relative px-4 py-2 text-sm font-medium rounded-md transition-colors z-10 flex items-center gap-2',
                 activeTab === tab.id
                   ? 'text-primary'
                   : 'text-text-muted hover:text-primary'
@@ -63,6 +126,16 @@ export default function MyTimesPage() {
                 />
               )}
               <span className="relative z-10">{tab.label}</span>
+              {tab.count > 0 && (
+                <span className={cn(
+                  "relative z-10 text-xs px-1.5 py-0.5 rounded-full",
+                  activeTab === tab.id
+                    ? "bg-accent text-white"
+                    : "bg-secondary-300 text-text-muted"
+                )}>
+                  {tab.count}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -76,9 +149,47 @@ export default function MyTimesPage() {
             exit={{ opacity: 0, x: -10 }}
             transition={{ duration: 0.2 }}
           >
-            {activeTab === 'upcoming' && <UpcomingTeeTimes />}
-            {activeTab === 'hosted' && <HostedTeeTimes />}
-            {activeTab === 'past' && <PastTeeTimes />}
+            {activeTab === 'upcoming' && (
+              <TeeTimeList
+                teeTimes={upcomingTeeTimes}
+                isLoading={isLoading}
+                emptyIcon={<CalendarIcon className="h-12 w-12" />}
+                emptyTitle="No upcoming tee times"
+                emptyDescription="You haven't joined any tee times yet. Browse the feed to find groups to play with."
+                emptyAction={
+                  <Link href="/feed">
+                    <Button>Browse Tee Times</Button>
+                  </Link>
+                }
+              />
+            )}
+            {activeTab === 'hosted' && (
+              <TeeTimeList
+                teeTimes={hostedTeeTimes}
+                isLoading={isLoading}
+                isHosted
+                emptyIcon={<GolfIcon className="h-12 w-12" />}
+                emptyTitle="No hosted tee times"
+                emptyDescription="You haven't posted any tee times yet. Create one to find playing partners."
+                emptyAction={
+                  <Link href="/post">
+                    <Button leftIcon={<PlusIcon className="h-4 w-4" />}>
+                      Post Tee Time
+                    </Button>
+                  </Link>
+                }
+              />
+            )}
+            {activeTab === 'past' && (
+              <TeeTimeList
+                teeTimes={pastTeeTimes}
+                isLoading={isLoading}
+                isPast
+                emptyIcon={<ClockIcon className="h-12 w-12" />}
+                emptyTitle="No past rounds"
+                emptyDescription="Your completed rounds will appear here. Start by joining a tee time!"
+              />
+            )}
           </motion.div>
         </AnimatePresence>
       </Container>
@@ -86,46 +197,25 @@ export default function MyTimesPage() {
   );
 }
 
-function UpcomingTeeTimes() {
-  const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { user, isAuthenticated, token } = useAuth();
-
-  useEffect(() => {
-    async function fetchTeeTimes() {
-      setIsLoading(true);
-      try {
-        const response = await api.getUserTeeTimes();
-
-        if (response.success && response.data) {
-          const now = new Date();
-
-          // Filter to upcoming tee times where user has joined or is host
-          const upcoming = response.data.filter(tt => {
-            const teeTimeDate = new Date(tt.dateTime);
-            const isUpcoming = teeTimeDate > now;
-            // Check if user is host or has joined a slot
-            const isHost = tt.host?.id === user?.id;
-            const hasJoined = tt.slots?.some(slot => slot.user?.id === user?.id);
-            return isUpcoming && (isHost || hasJoined);
-          });
-
-          setTeeTimes(upcoming);
-        }
-      } catch (err) {
-        console.error('Failed to fetch tee times:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if (isAuthenticated && token && user) {
-      fetchTeeTimes();
-    } else if (!isAuthenticated) {
-      setIsLoading(false);
-    }
-  }, [user, isAuthenticated, token]);
-
+function TeeTimeList({
+  teeTimes,
+  isLoading,
+  isHosted,
+  isPast,
+  emptyIcon,
+  emptyTitle,
+  emptyDescription,
+  emptyAction,
+}: {
+  teeTimes: TeeTime[];
+  isLoading: boolean;
+  isHosted?: boolean;
+  isPast?: boolean;
+  emptyIcon: React.ReactNode;
+  emptyTitle: string;
+  emptyDescription: string;
+  emptyAction?: React.ReactNode;
+}) {
   if (isLoading) {
     return <LoadingState />;
   }
@@ -133,14 +223,10 @@ function UpcomingTeeTimes() {
   if (teeTimes.length === 0) {
     return (
       <EmptyState
-        icon={<CalendarIcon className="h-12 w-12" />}
-        title="No upcoming tee times"
-        description="You haven't joined any tee times yet. Browse the feed to find groups to play with."
-        action={
-          <Link href="/feed">
-            <Button>Browse Tee Times</Button>
-          </Link>
-        }
+        icon={emptyIcon}
+        title={emptyTitle}
+        description={emptyDescription}
+        action={emptyAction}
       />
     );
   }
@@ -148,129 +234,12 @@ function UpcomingTeeTimes() {
   return (
     <div className="grid gap-4">
       {teeTimes.map((teeTime) => (
-        <TeeTimeCard key={teeTime.id} teeTime={teeTime} />
-      ))}
-    </div>
-  );
-}
-
-function HostedTeeTimes() {
-  const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { user, isAuthenticated, token } = useAuth();
-
-  useEffect(() => {
-    async function fetchTeeTimes() {
-      setIsLoading(true);
-      try {
-        const response = await api.getUserTeeTimes();
-
-        if (response.success && response.data) {
-          const now = new Date();
-          // Filter to tee times where user is the host (future only)
-          const hosted = response.data.filter(tt => {
-            const teeTimeDate = new Date(tt.dateTime);
-            const isHost = tt.host?.id === user?.id;
-            const isFuture = teeTimeDate > now;
-            return isHost && isFuture;
-          });
-          setTeeTimes(hosted);
-        }
-      } catch (err) {
-        console.error('Failed to fetch hosted tee times:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if (isAuthenticated && token && user) {
-      fetchTeeTimes();
-    } else if (!isAuthenticated) {
-      setIsLoading(false);
-    }
-  }, [user, isAuthenticated, token]);
-
-  if (isLoading) {
-    return <LoadingState />;
-  }
-
-  if (teeTimes.length === 0) {
-    return (
-      <EmptyState
-        icon={<GolfIcon className="h-12 w-12" />}
-        title="No hosted tee times"
-        description="You haven't posted any tee times yet. Create one to find playing partners."
-        action={
-          <Link href="/post">
-            <Button leftIcon={<PlusIcon className="h-4 w-4" />}>
-              Post Tee Time
-            </Button>
-          </Link>
-        }
-      />
-    );
-  }
-
-  return (
-    <div className="grid gap-4">
-      {teeTimes.map((teeTime) => (
-        <TeeTimeCard key={teeTime.id} teeTime={teeTime} isHosted />
-      ))}
-    </div>
-  );
-}
-
-function PastTeeTimes() {
-  const [teeTimes, setTeeTimes] = useState<TeeTime[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { user, isAuthenticated, token } = useAuth();
-
-  useEffect(() => {
-    async function fetchTeeTimes() {
-      setIsLoading(true);
-      try {
-        const response = await api.getUserTeeTimes();
-        if (response.success && response.data) {
-          const now = new Date();
-          // Filter to past tee times
-          const past = response.data.filter(tt => {
-            const teeTimeDate = new Date(tt.dateTime);
-            return teeTimeDate <= now;
-          });
-          setTeeTimes(past);
-        }
-      } catch (err) {
-        console.error('[PastTimes] Failed to fetch tee times:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if (isAuthenticated && token) {
-      fetchTeeTimes();
-    } else if (!isAuthenticated && !token) {
-      setIsLoading(false);
-    }
-  }, [user, isAuthenticated, token]);
-
-  if (isLoading) {
-    return <LoadingState />;
-  }
-
-  if (teeTimes.length === 0) {
-    return (
-      <EmptyState
-        icon={<ClockIcon className="h-12 w-12" />}
-        title="No past rounds"
-        description="Your completed rounds will appear here. Start by joining a tee time!"
-      />
-    );
-  }
-
-  return (
-    <div className="grid gap-4">
-      {teeTimes.map((teeTime) => (
-        <TeeTimeCard key={teeTime.id} teeTime={teeTime} isPast />
+        <TeeTimeCard
+          key={teeTime.id}
+          teeTime={teeTime}
+          isHosted={isHosted}
+          isPast={isPast}
+        />
       ))}
     </div>
   );
@@ -278,7 +247,6 @@ function PastTeeTimes() {
 
 function TeeTimeCard({ teeTime, isHosted, isPast }: { teeTime: TeeTime; isHosted?: boolean; isPast?: boolean }) {
   const dateTime = new Date(teeTime.dateTime);
-  // Note: API returns slot.user (object) not slot.userId
   const filledSlots = teeTime.slots?.filter(s => s.user).length || 0;
 
   return (
