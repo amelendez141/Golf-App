@@ -89,7 +89,8 @@ export function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-            <ThemeToggle />
+            {/* Theme toggle hidden - dark mode not fully implemented */}
+            {/* <ThemeToggle /> */}
 
             {isAuthenticated && user ? (
               // Authenticated user menu
