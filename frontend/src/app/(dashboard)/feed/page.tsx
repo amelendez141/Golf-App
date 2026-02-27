@@ -90,10 +90,10 @@ export default function FeedPage() {
       <Container>
         {/* Header - Better mobile typography */}
         <div className="mb-4 sm:mb-6">
-          <h1 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-primary mb-1 sm:mb-2">
+          <h1 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
             Tee Times
           </h1>
-          <p className="text-sm sm:text-base text-text-secondary">
+          <p className="text-sm sm:text-base text-gray-500">
             Find open tee times and join groups of like-minded professionals.
           </p>
         </div>
@@ -108,11 +108,11 @@ export default function FeedPage() {
         {isLoading ? (
           <TeeTimeCardSkeletonList count={6} />
         ) : isError ? (
-          <div className="text-center py-12">
-            <p className="text-text-muted mb-4">Failed to load tee times</p>
+          <div className="text-center py-8 sm:py-12">
+            <p className="text-gray-500 mb-4 text-sm sm:text-base">Failed to load tee times</p>
             <button
               onClick={() => refetch()}
-              className="text-accent hover:text-accent-600 font-medium"
+              className="text-accent hover:text-accent-600 font-medium text-sm sm:text-base"
             >
               Try again
             </button>
@@ -146,15 +146,15 @@ export default function FeedPage() {
             </StaggerList>
 
             {/* Load more trigger */}
-            <div ref={loadMoreRef} className="py-8 flex justify-center">
+            <div ref={loadMoreRef} className="py-6 sm:py-8 flex justify-center">
               {isFetchingNextPage && (
-                <div className="flex items-center gap-2 text-text-muted">
+                <div className="flex items-center gap-2 text-gray-400 text-sm">
                   <LoadingSpinner />
                   <span>Loading more...</span>
                 </div>
               )}
               {!hasNextPage && teeTimes.length > 0 && (
-                <p className="text-text-muted text-sm">
+                <p className="text-gray-400 text-sm">
                   You&apos;ve seen all available tee times
                 </p>
               )}

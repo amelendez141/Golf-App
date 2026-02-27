@@ -43,7 +43,7 @@ export default function MessagesPage() {
 
   if (isLoading) {
     return (
-      <div className="py-6">
+      <div className="py-4 sm:py-6 pb-24 sm:pb-6">
         <Container>
           <MessagesSkeleton />
         </Container>
@@ -52,33 +52,33 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="py-6">
+    <div className="py-4 sm:py-6 pb-24 sm:pb-6">
       <Container>
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="font-serif text-2xl md:text-3xl font-bold text-primary mb-2">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
             Messages
           </h1>
-          <p className="text-text-secondary">
+          <p className="text-sm sm:text-base text-gray-500">
             Connect with your playing partners.
           </p>
         </div>
 
         {teeTimes.length === 0 ? (
           /* Empty State */
-          <Card className="py-12">
-            <div className="flex flex-col items-center text-center">
-              <div className="text-primary/20 mb-4">
-                <MessageIcon className="h-12 w-12" />
+          <Card className="py-8 sm:py-12" padding="md">
+            <div className="flex flex-col items-center text-center px-4">
+              <div className="text-gray-300 mb-3 sm:mb-4">
+                <MessageIcon className="h-10 w-10 sm:h-12 sm:w-12" />
               </div>
-              <h3 className="font-serif text-lg font-semibold text-primary mb-2">
+              <h3 className="font-serif text-base sm:text-lg font-semibold text-gray-900 mb-2">
                 No conversations yet
               </h3>
-              <p className="text-text-muted max-w-md mb-6">
+              <p className="text-sm sm:text-base text-gray-500 max-w-md mb-4 sm:mb-6">
                 When you join tee times, you'll be able to chat with your playing partners here.
               </p>
               <Link href="/feed">
-                <button className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                <button className="px-5 sm:px-6 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors duration-100">
                   Browse Tee Times
                 </button>
               </Link>
@@ -104,8 +104,8 @@ function ConversationCard({ teeTime, currentUserId }: { teeTime: TeeTime; curren
 
   return (
     <Link href={`/tee-time/${teeTime.id}`}>
-      <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
-        <div className="flex gap-4">
+      <Card variant="interactive" padding="none" className="p-3 sm:p-4">
+        <div className="flex gap-3 sm:gap-4">
           {/* Course Image or Participant Avatars */}
           <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-primary/10">
             {teeTime.course?.imageUrl ? (
@@ -125,21 +125,21 @@ function ConversationCard({ teeTime, currentUserId }: { teeTime: TeeTime; curren
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-medium text-primary truncate">
+              <h3 className="font-medium text-sm sm:text-base text-gray-900 truncate">
                 {teeTime.course?.name}
               </h3>
-              <span className="text-xs text-text-muted whitespace-nowrap">
+              <span className="text-xs text-gray-400 whitespace-nowrap">
                 {dateTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </span>
             </div>
 
-            <p className="text-sm text-text-muted truncate">
+            <p className="text-xs sm:text-sm text-gray-500 truncate">
               {dateTime.toLocaleDateString('en-US', { weekday: 'short' })} at{' '}
               {dateTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
             </p>
 
             {/* Participants */}
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-1.5 sm:mt-2">
               <div className="flex -space-x-2">
                 {otherParticipants.slice(0, 3).map((participant) => (
                   <Avatar
@@ -148,18 +148,18 @@ function ConversationCard({ teeTime, currentUserId }: { teeTime: TeeTime; curren
                     firstName={participant.firstName}
                     lastName={participant.lastName}
                     size="xs"
-                    className="ring-2 ring-card"
+                    className="ring-2 ring-white"
                   />
                 ))}
               </div>
-              <span className="text-xs text-text-muted">
+              <span className="text-xs text-gray-400">
                 {participants.length} {participants.length === 1 ? 'player' : 'players'}
               </span>
             </div>
           </div>
 
           {/* Arrow */}
-          <div className="flex items-center text-text-muted">
+          <div className="flex items-center text-gray-300">
             <ChevronRightIcon className="h-5 w-5" />
           </div>
         </div>

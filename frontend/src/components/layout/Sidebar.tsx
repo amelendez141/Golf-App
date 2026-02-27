@@ -25,7 +25,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:top-16 lg:bottom-0 lg:left-0 lg:border-r lg:border-primary/5 lg:bg-card">
+    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:top-16 lg:bottom-0 lg:left-0 lg:border-r lg:border-gray-200/60 lg:bg-white">
       <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
         <nav className="flex-1 px-3 space-y-1">
           {NAV_LINKS.map((link) => {
@@ -38,10 +38,10 @@ export function Sidebar() {
                 href={link.href}
                 data-tour={tourAttribute}
                 className={cn(
-                  'group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
+                  'group flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-100',
                   isActive
-                    ? 'bg-primary text-white shadow-md'
-                    : 'text-text-secondary hover:bg-primary/5 hover:text-primary'
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                 )}
               >
                 <NavIcon name={link.icon} className="h-5 w-5" />
@@ -56,25 +56,25 @@ export function Sidebar() {
           <Link
             href="/post"
             className={cn(
-              'flex items-center justify-center gap-2 px-4 py-3 rounded-xl',
-              'bg-accent text-white font-medium shadow-button hover:shadow-button-hover',
-              'transition-all duration-200 hover:bg-accent-600 active:scale-[0.98]'
+              'flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg',
+              'bg-accent text-white text-sm font-medium shadow-sm',
+              'transition-all duration-100 hover:bg-accent-600 active:scale-[0.98]'
             )}
           >
-            <PlusIcon className="h-5 w-5" />
+            <PlusIcon className="h-4 w-4" />
             Post Tee Time
           </Link>
         </div>
 
         {/* Bottom section */}
-        <div className="px-3 py-4 border-t border-primary/5">
+        <div className="px-3 py-4 border-t border-gray-100">
           <Link
             href="/settings"
             className={cn(
-              'flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200',
+              'flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-100',
               pathname === '/settings'
-                ? 'bg-primary/5 text-primary'
-                : 'text-text-secondary hover:bg-primary/5 hover:text-primary'
+                ? 'bg-gray-100 text-gray-900'
+                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
             )}
           >
             <SettingsIcon className="h-5 w-5" />

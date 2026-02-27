@@ -145,7 +145,7 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="py-6">
+      <div className="py-4 sm:py-6 pb-24 sm:pb-6">
         <Container size="md">
           <SettingsSkeleton />
         </Container>
@@ -154,33 +154,33 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="py-6">
+    <div className="py-4 sm:py-6 pb-24 sm:pb-6">
       <Container size="md">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="font-serif text-2xl md:text-3xl font-bold text-primary mb-2">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
             Settings
           </h1>
-          <p className="text-text-secondary">
+          <p className="text-sm sm:text-base text-gray-500">
             Manage your account and preferences.
           </p>
         </div>
 
         {/* Save Message */}
         {saveMessage && (
-          <div className={`mb-6 p-4 rounded-lg ${
+          <div className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg text-sm sm:text-base ${
             saveMessage.type === 'success'
-              ? 'bg-green-100 text-green-800 border border-green-200'
-              : 'bg-red-100 text-red-800 border border-red-200'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
           }`}>
             {saveMessage.text}
           </div>
         )}
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Profile Settings */}
-          <Card>
-            <h2 className="font-serif text-lg font-semibold text-primary mb-4">
+          <Card padding="md">
+            <h2 className="font-serif text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
               Profile Information
             </h2>
             <div className="space-y-4">
@@ -227,8 +227,8 @@ export default function SettingsPage() {
           </Card>
 
           {/* Golf Settings */}
-          <Card>
-            <h2 className="font-serif text-lg font-semibold text-primary mb-4">
+          <Card padding="md">
+            <h2 className="font-serif text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
               Golf Profile
             </h2>
             <div className="space-y-4">
@@ -254,8 +254,8 @@ export default function SettingsPage() {
           </Card>
 
           {/* Location Settings */}
-          <Card>
-            <h2 className="font-serif text-lg font-semibold text-primary mb-4">
+          <Card padding="md">
+            <h2 className="font-serif text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
               Location
             </h2>
             <div className="space-y-4">
@@ -280,8 +280,8 @@ export default function SettingsPage() {
           </Card>
 
           {/* Notification Settings */}
-          <Card>
-            <h2 className="font-serif text-lg font-semibold text-primary mb-4">
+          <Card padding="md">
+            <h2 className="font-serif text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
               Notifications
             </h2>
             <div className="space-y-4">
@@ -307,8 +307,8 @@ export default function SettingsPage() {
           </Card>
 
           {/* Privacy Settings */}
-          <Card>
-            <h2 className="font-serif text-lg font-semibold text-primary mb-4">
+          <Card padding="md">
+            <h2 className="font-serif text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
               Privacy
             </h2>
             <div className="space-y-4">
@@ -334,11 +334,11 @@ export default function SettingsPage() {
           </Card>
 
           {/* Save Button */}
-          <div className="flex justify-end gap-3">
-            <Button variant="secondary" onClick={() => window.history.back()}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
+            <Button variant="secondary" fullWidth className="sm:w-auto" onClick={() => window.history.back()}>
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
+            <Button fullWidth className="sm:w-auto" onClick={handleSave} disabled={isSaving}>
               {isSaving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
@@ -360,22 +360,22 @@ function ToggleSetting({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4">
-      <div>
-        <p className="font-medium text-primary">{label}</p>
-        <p className="text-sm text-text-muted">{description}</p>
+    <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4">
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-gray-900 text-sm sm:text-base">{label}</p>
+        <p className="text-xs sm:text-sm text-gray-500">{description}</p>
       </div>
       <button
         type="button"
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
-          checked ? 'bg-accent' : 'bg-secondary-300'
+        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
+          checked ? 'bg-accent' : 'bg-gray-200'
         }`}
         role="switch"
         aria-checked={checked}
       >
         <span
-          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform ${
+          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition-transform duration-100 ${
             checked ? 'translate-x-5' : 'translate-x-0'
           }`}
         />

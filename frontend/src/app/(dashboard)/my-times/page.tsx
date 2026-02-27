@@ -82,27 +82,27 @@ export default function MyTimesPage() {
   };
 
   return (
-    <div className="py-6">
+    <div className="py-4 sm:py-6 pb-24 sm:pb-6">
       <Container>
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div>
-            <h1 className="font-serif text-2xl md:text-3xl font-bold text-primary mb-2">
+            <h1 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
               My Tee Times
             </h1>
-            <p className="text-text-secondary">
+            <p className="text-sm sm:text-base text-gray-500">
               Manage your upcoming rounds and view your history.
             </p>
           </div>
-          <Link href="/post">
-            <Button leftIcon={<PlusIcon className="h-4 w-4" />}>
+          <Link href="/post" className="w-full sm:w-auto">
+            <Button leftIcon={<PlusIcon className="h-4 w-4" />} fullWidth className="sm:w-auto">
               Post Tee Time
             </Button>
           </Link>
         </div>
 
         {/* Tabs with animated indicator */}
-        <div className="flex gap-1 p-1 bg-secondary-200 rounded-lg w-fit mb-6 relative">
+        <div className="flex gap-1 p-1 bg-gray-100 rounded-lg w-full sm:w-fit mb-4 sm:mb-6 relative overflow-x-auto">
           {[
             { id: 'upcoming' as TabType, label: 'Upcoming', count: counts.upcoming },
             { id: 'hosted' as TabType, label: 'Hosted', count: counts.hosted },
@@ -112,16 +112,16 @@ export default function MyTimesPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'relative px-4 py-2 text-sm font-medium rounded-md transition-colors z-10 flex items-center gap-2',
+                'relative flex-1 sm:flex-none px-3 sm:px-4 py-2 text-sm font-medium rounded-md transition-colors duration-100 z-10 flex items-center justify-center gap-2 min-h-[40px]',
                 activeTab === tab.id
-                  ? 'text-primary'
-                  : 'text-text-muted hover:text-primary'
+                  ? 'text-gray-900'
+                  : 'text-gray-500 hover:text-gray-900'
               )}
             >
               {activeTab === tab.id && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 bg-card rounded-md shadow-sm"
+                  className="absolute inset-0 bg-white rounded-md shadow-sm"
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
@@ -131,7 +131,7 @@ export default function MyTimesPage() {
                   "relative z-10 text-xs px-1.5 py-0.5 rounded-full",
                   activeTab === tab.id
                     ? "bg-accent text-white"
-                    : "bg-secondary-300 text-text-muted"
+                    : "bg-gray-200 text-gray-500"
                 )}>
                   {tab.count}
                 </span>
@@ -251,10 +251,10 @@ function TeeTimeCard({ teeTime, isHosted, isPast }: { teeTime: TeeTime; isHosted
 
   return (
     <Link href={`/tee-time/${teeTime.id}`}>
-      <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
-        <div className="flex gap-4">
+      <Card variant="interactive" padding="none" className="p-3 sm:p-4">
+        <div className="flex gap-3 sm:gap-4">
           {/* Course Image */}
-          <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden flex-shrink-0">
             {teeTime.course?.imageUrl ? (
               <Image
                 src={teeTime.course.imageUrl}
@@ -263,8 +263,8 @@ function TeeTimeCard({ teeTime, isHosted, isPast }: { teeTime: TeeTime; isHosted
                 className="object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-                <GolfIcon className="h-8 w-8 text-primary/40" />
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                <GolfIcon className="h-6 w-6 sm:h-8 sm:w-8 text-gray-300" />
               </div>
             )}
           </div>
@@ -272,30 +272,30 @@ function TeeTimeCard({ teeTime, isHosted, isPast }: { teeTime: TeeTime; isHosted
           {/* Details */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <div>
-                <h3 className="font-semibold text-primary truncate">
+              <div className="min-w-0">
+                <h3 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
                   {teeTime.course?.name}
                 </h3>
-                <p className="text-sm text-text-muted">
+                <p className="text-xs sm:text-sm text-gray-500">
                   {teeTime.course?.city}, {teeTime.course?.state}
                 </p>
               </div>
               {isHosted && (
-                <Badge variant="accent" size="sm">Host</Badge>
+                <Badge variant="accent" size="xs">Host</Badge>
               )}
               {isPast && (
-                <Badge variant="secondary" size="sm">Completed</Badge>
+                <Badge variant="secondary" size="xs">Done</Badge>
               )}
             </div>
 
-            <div className="mt-2 flex items-center gap-4 text-sm">
-              <span className="text-text-secondary">
+            <div className="mt-1.5 sm:mt-2 flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+              <span className="text-gray-600">
                 {dateTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
               </span>
-              <span className="text-text-secondary">
+              <span className="text-gray-600">
                 {dateTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
               </span>
-              <span className="text-text-muted">
+              <span className="text-gray-400">
                 {filledSlots}/{teeTime.totalSlots} players
               </span>
             </div>
@@ -308,15 +308,15 @@ function TeeTimeCard({ teeTime, isHosted, isPast }: { teeTime: TeeTime; isHosted
 
 function LoadingState() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {[1, 2, 3].map((i) => (
-        <Card key={i} className="p-4 animate-pulse">
-          <div className="flex gap-4">
-            <div className="w-24 h-24 rounded-lg bg-primary/10" />
+        <Card key={i} padding="none" className="p-3 sm:p-4">
+          <div className="flex gap-3 sm:gap-4 animate-pulse">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-gray-100" />
             <div className="flex-1 space-y-2">
-              <div className="h-5 bg-primary/10 rounded w-3/4" />
-              <div className="h-4 bg-primary/10 rounded w-1/2" />
-              <div className="h-4 bg-primary/10 rounded w-1/3" />
+              <div className="h-4 sm:h-5 bg-gray-100 rounded w-3/4" />
+              <div className="h-3 sm:h-4 bg-gray-100 rounded w-1/2" />
+              <div className="h-3 sm:h-4 bg-gray-100 rounded w-1/3" />
             </div>
           </div>
         </Card>
@@ -342,10 +342,10 @@ function EmptyState({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0, 0, 0.2, 1] }}
     >
-      <Card className="py-12">
-        <div className="flex flex-col items-center text-center">
+      <Card className="py-8 sm:py-12" padding="md">
+        <div className="flex flex-col items-center text-center px-4">
           <motion.div
-            className="text-primary/20 mb-4"
+            className="text-gray-300 mb-3 sm:mb-4"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 400, damping: 20, delay: 0.1 }}
@@ -353,7 +353,7 @@ function EmptyState({
             {icon}
           </motion.div>
           <motion.h3
-            className="font-serif text-lg font-semibold text-primary mb-2"
+            className="font-serif text-base sm:text-lg font-semibold text-gray-900 mb-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
@@ -361,7 +361,7 @@ function EmptyState({
             {title}
           </motion.h3>
           <motion.p
-            className="text-text-muted max-w-md mb-6"
+            className="text-sm sm:text-base text-gray-500 max-w-md mb-4 sm:mb-6"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
