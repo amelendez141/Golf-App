@@ -10,29 +10,49 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary:
-          'bg-primary text-white hover:bg-primary-600 shadow-button hover:shadow-button-hover border border-primary-600/20',
-        secondary:
-          'bg-white text-primary border border-primary/10 hover:bg-secondary-100 hover:border-primary/15 shadow-sm',
-        accent:
-          'bg-gradient-to-b from-accent to-accent-600 text-white shadow-button hover:shadow-button-hover border border-accent-600/30',
-        ghost:
-          'text-primary hover:bg-primary/5 active:bg-primary/10',
-        outline:
-          'border-2 border-primary/15 text-primary hover:bg-primary/5 hover:border-primary/25',
-        danger:
-          'bg-gradient-to-b from-error to-red-600 text-white border border-red-700/30',
-        link:
-          'text-accent font-medium underline-offset-4 hover:underline p-0 h-auto',
+        primary: [
+          'text-white',
+          'bg-gradient-to-b from-[rgb(40,80,60)] to-[rgb(20,50,38)]',
+          'shadow-[0_1px_2px_rgba(0,0,0,0.1),0_4px_12px_rgba(20,50,38,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]',
+          'hover:shadow-[0_2px_4px_rgba(0,0,0,0.1),0_8px_20px_rgba(20,50,38,0.25),inset_0_1px_0_rgba(255,255,255,0.15)]',
+          'active:shadow-[0_1px_2px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(0,0,0,0.1)]',
+          'border border-black/10',
+        ].join(' '),
+        secondary: [
+          'text-primary bg-white',
+          'border border-black/[0.08]',
+          'shadow-[0_1px_2px_rgba(0,0,0,0.04),0_2px_4px_rgba(0,0,0,0.02)]',
+          'hover:bg-gray-50 hover:border-black/[0.12]',
+          'hover:shadow-[0_2px_4px_rgba(0,0,0,0.06),0_4px_8px_rgba(0,0,0,0.04)]',
+        ].join(' '),
+        accent: [
+          'text-white',
+          'bg-gradient-to-b from-[rgb(200,160,90)] to-[rgb(170,130,60)]',
+          'shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_16px_rgba(180,140,70,0.3),inset_0_1px_0_rgba(255,255,255,0.2)]',
+          'hover:shadow-[0_2px_4px_rgba(0,0,0,0.1),0_8px_24px_rgba(180,140,70,0.4),inset_0_1px_0_rgba(255,255,255,0.25)]',
+          'border border-[rgb(150,115,50)]/30',
+        ].join(' '),
+        ghost: 'text-primary hover:bg-black/[0.04] active:bg-black/[0.06]',
+        outline: [
+          'border-2 border-black/[0.1] text-primary',
+          'hover:bg-black/[0.02] hover:border-black/[0.15]',
+        ].join(' '),
+        danger: [
+          'text-white',
+          'bg-gradient-to-b from-[rgb(240,80,80)] to-[rgb(220,50,50)]',
+          'shadow-[0_1px_2px_rgba(0,0,0,0.1),0_4px_12px_rgba(220,50,50,0.25)]',
+          'border border-red-700/30',
+        ].join(' '),
+        link: 'text-accent font-medium underline-offset-4 hover:underline p-0 h-auto',
       },
       size: {
         sm: 'h-10 px-4 text-sm',
-        md: 'h-11 px-5 text-sm',
-        lg: 'h-12 px-6 text-[15px]',
+        md: 'h-12 px-5 text-sm',
+        lg: 'h-[52px] px-7 text-[15px]',
         xl: 'h-14 px-8 text-base',
-        icon: 'h-11 w-11',
+        icon: 'h-12 w-12',
         'icon-sm': 'h-10 w-10',
-        'icon-lg': 'h-12 w-12',
+        'icon-lg': 'h-14 w-14',
       },
       fullWidth: {
         true: 'w-full',
@@ -83,7 +103,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={isDisabled}
         whileHover={!isDisabled && !isLink ? {
-          scale: 1.015,
+          scale: 1.01,
           y: -1,
         } : undefined}
         whileTap={!isDisabled && !isLink ? {
@@ -92,8 +112,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         } : undefined}
         transition={{
           type: 'spring',
-          stiffness: 500,
-          damping: 25,
+          stiffness: 400,
+          damping: 20,
         }}
         {...props}
       >
@@ -101,9 +121,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           <LoadingSpinner />
         ) : (
           <>
-            {leftIcon && <span className="shrink-0">{leftIcon}</span>}
+            {leftIcon && <span className="shrink-0 -ml-0.5">{leftIcon}</span>}
             {children}
-            {rightIcon && <span className="shrink-0">{rightIcon}</span>}
+            {rightIcon && <span className="shrink-0 -mr-0.5">{rightIcon}</span>}
           </>
         )}
       </motion.button>
@@ -116,27 +136,27 @@ Button.displayName = 'Button';
 function LoadingSpinner() {
   return (
     <motion.svg
-      className="h-4 w-4"
+      className="h-5 w-5"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
       animate={{ rotate: 360 }}
       transition={{
-        duration: 1,
+        duration: 0.8,
         repeat: Infinity,
         ease: 'linear',
       }}
     >
       <circle
-        className="opacity-25"
+        className="opacity-20"
         cx="12"
         cy="12"
         r="10"
         stroke="currentColor"
-        strokeWidth="4"
+        strokeWidth="3"
       />
       <path
-        className="opacity-75"
+        className="opacity-90"
         fill="currentColor"
         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
       />

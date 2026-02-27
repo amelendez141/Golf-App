@@ -5,21 +5,21 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const inputVariants = cva(
-  'flex w-full rounded-xl border bg-card text-base transition-all duration-200 placeholder:text-text-muted focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation',
+  'flex w-full rounded-xl border bg-white text-[15px] transition-all duration-200 placeholder:text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]',
   {
     variants: {
       variant: {
         default:
-          'border-primary/10 focus:border-accent focus:ring-2 focus:ring-accent/20',
+          'border-black/[0.08] hover:border-black/[0.12] focus:border-accent focus:ring-4 focus:ring-accent/10 focus:shadow-[inset_0_1px_2px_rgba(0,0,0,0.04),0_0_0_4px_rgba(180,140,70,0.1)]',
         error:
-          'border-error focus:border-error focus:ring-2 focus:ring-error/20',
+          'border-error/50 focus:border-error focus:ring-4 focus:ring-error/10',
         success:
-          'border-success focus:border-success focus:ring-2 focus:ring-success/20',
+          'border-success/50 focus:border-success focus:ring-4 focus:ring-success/10',
       },
       inputSize: {
-        sm: 'h-11 px-3 text-base', // min 44px for touch
-        md: 'h-12 px-4 text-base', // 48px for comfortable touch
-        lg: 'h-14 px-4 text-base', // 56px for spacious touch
+        sm: 'h-11 px-4 text-[15px]',
+        md: 'h-12 px-4 text-[15px]',
+        lg: 'h-14 px-5 text-base',
       },
     },
     defaultVariants: {
@@ -63,7 +63,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="mb-1.5 block text-sm font-medium text-text-secondary"
+            className="mb-2 block text-sm font-semibold text-gray-700 tracking-tight"
           >
             {label}
           </label>

@@ -43,16 +43,18 @@ export function Navbar() {
     : '';
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-primary/[0.06] bg-white/85 backdrop-blur-xl backdrop-saturate-150 shadow-[0_1px_0_rgba(27,58,45,0.03)]">
+    <nav className="sticky top-0 z-40 border-b border-black/[0.04] bg-white/80 backdrop-blur-2xl backdrop-saturate-200 shadow-[0_1px_0_rgba(0,0,0,0.02),0_4px_20px_rgba(0,0,0,0.03)]">
       <Container>
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href={isAuthenticated ? '/feed' : '/'} className="flex items-center gap-2.5 group">
+          <Link href={isAuthenticated ? '/feed' : '/'} className="flex items-center gap-3 group">
             <div className="relative">
-              <div className="absolute inset-0 bg-accent/20 rounded-full blur-lg group-hover:blur-xl transition-all opacity-0 group-hover:opacity-100" />
-              <GolfIcon className="h-9 w-9 text-primary relative" />
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/30 to-accent/10 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500 opacity-0 group-hover:opacity-100" />
+              <div className="relative h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary-600 flex items-center justify-center shadow-[0_2px_8px_rgba(20,50,38,0.3)]">
+                <GolfIcon className="h-5 w-5 text-white" />
+              </div>
             </div>
-            <span className="font-serif text-xl font-bold tracking-tight text-primary">
+            <span className="font-serif text-[22px] font-extrabold tracking-tight text-primary">
               LinkUp
             </span>
           </Link>
