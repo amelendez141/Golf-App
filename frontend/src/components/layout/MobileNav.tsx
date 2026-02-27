@@ -26,7 +26,7 @@ export function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-black/[0.04] bg-white/85 backdrop-blur-2xl backdrop-saturate-200 shadow-[0_-1px_0_rgba(0,0,0,0.02),0_-8px_32px_rgba(0,0,0,0.04)] lg:hidden safe-left safe-right">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200/60 bg-white/90 backdrop-blur-xl lg:hidden safe-left safe-right">
       {/* Safe area spacer for bottom */}
       <div className="flex items-center justify-around h-[72px] pb-safe">
         {MOBILE_NAV_LINKS.map((link) => {
@@ -42,12 +42,12 @@ export function MobileNav() {
               href={link.href}
               data-tour={tourAttribute}
               className={cn(
-                'relative flex flex-col items-center justify-center rounded-xl transition-all duration-200 touch-manipulation select-none-mobile',
+                'relative flex flex-col items-center justify-center rounded-lg transition-all duration-100 touch-manipulation select-none-mobile',
                 isPostButton
-                  ? 'bg-gradient-to-b from-[rgb(200,160,90)] to-[rgb(160,125,55)] text-white rounded-2xl h-14 w-14 -mt-5 shadow-[0_4px_16px_rgba(180,140,70,0.4),0_8px_32px_rgba(180,140,70,0.2)] active:scale-95 border border-[rgb(220,180,110)]/30'
-                  : 'min-h-[56px] min-w-[64px] px-3 py-2 active:bg-primary/5',
-                isActive && !isPostButton && 'text-primary',
-                !isActive && !isPostButton && 'text-text-muted'
+                  ? 'bg-gradient-to-b from-accent to-accent-600 text-white rounded-xl h-12 w-12 -mt-4 shadow-md active:scale-95'
+                  : 'min-h-[56px] min-w-[64px] px-3 py-2 active:bg-gray-100',
+                isActive && !isPostButton && 'text-gray-900',
+                !isActive && !isPostButton && 'text-gray-400'
               )}
             >
               {/* Active indicator */}
@@ -68,8 +68,8 @@ export function MobileNav() {
               />
               {!isPostButton && (
                 <span className={cn(
-                  'text-[11px] font-medium mt-0.5 transition-colors',
-                  isActive ? 'text-primary' : 'text-text-muted'
+                  'text-[10px] font-medium mt-0.5 transition-colors',
+                  isActive ? 'text-gray-900' : 'text-gray-400'
                 )}>
                   {link.label}
                 </span>

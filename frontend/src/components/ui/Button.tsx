@@ -6,53 +6,56 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 rounded-xl font-semibold tracking-tight transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-1.5 font-medium transition-all duration-100 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 select-none',
   {
     variants: {
       variant: {
         primary: [
-          'text-white',
-          'bg-gradient-to-b from-[rgb(40,80,60)] to-[rgb(20,50,38)]',
-          'shadow-[0_1px_2px_rgba(0,0,0,0.1),0_4px_12px_rgba(20,50,38,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]',
-          'hover:shadow-[0_2px_4px_rgba(0,0,0,0.1),0_8px_20px_rgba(20,50,38,0.25),inset_0_1px_0_rgba(255,255,255,0.15)]',
-          'active:shadow-[0_1px_2px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(0,0,0,0.1)]',
-          'border border-black/10',
+          'bg-primary text-white border border-primary',
+          'hover:bg-primary/90',
+          'active:bg-primary/85',
+          'shadow-button',
         ].join(' '),
         secondary: [
-          'text-primary bg-white',
-          'border border-black/[0.08]',
-          'shadow-[0_1px_2px_rgba(0,0,0,0.04),0_2px_4px_rgba(0,0,0,0.02)]',
-          'hover:bg-gray-50 hover:border-black/[0.12]',
-          'hover:shadow-[0_2px_4px_rgba(0,0,0,0.06),0_4px_8px_rgba(0,0,0,0.04)]',
+          'bg-white text-gray-700 border border-gray-200',
+          'hover:bg-gray-50 hover:border-gray-300',
+          'active:bg-gray-100',
         ].join(' '),
         accent: [
-          'text-white',
-          'bg-gradient-to-b from-[rgb(200,160,90)] to-[rgb(170,130,60)]',
-          'shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_16px_rgba(180,140,70,0.3),inset_0_1px_0_rgba(255,255,255,0.2)]',
-          'hover:shadow-[0_2px_4px_rgba(0,0,0,0.1),0_8px_24px_rgba(180,140,70,0.4),inset_0_1px_0_rgba(255,255,255,0.25)]',
-          'border border-[rgb(150,115,50)]/30',
+          'bg-accent text-white border border-accent',
+          'hover:bg-accent/90',
+          'active:bg-accent/85',
+          'shadow-button',
         ].join(' '),
-        ghost: 'text-primary hover:bg-black/[0.04] active:bg-black/[0.06]',
+        ghost: [
+          'bg-transparent text-gray-600 border border-transparent',
+          'hover:bg-gray-100 hover:text-gray-900',
+          'active:bg-gray-200',
+        ].join(' '),
         outline: [
-          'border-2 border-black/[0.1] text-primary',
-          'hover:bg-black/[0.02] hover:border-black/[0.15]',
+          'bg-transparent text-gray-700 border border-gray-200',
+          'hover:bg-gray-50 hover:border-gray-300',
+          'active:bg-gray-100',
         ].join(' '),
         danger: [
-          'text-white',
-          'bg-gradient-to-b from-[rgb(240,80,80)] to-[rgb(220,50,50)]',
-          'shadow-[0_1px_2px_rgba(0,0,0,0.1),0_4px_12px_rgba(220,50,50,0.25)]',
-          'border border-red-700/30',
+          'bg-error text-white border border-error',
+          'hover:bg-error/90',
+          'active:bg-error/85',
         ].join(' '),
-        link: 'text-accent font-medium underline-offset-4 hover:underline p-0 h-auto',
+        link: [
+          'text-accent underline-offset-4 hover:underline',
+          'p-0 h-auto border-none',
+        ].join(' '),
       },
       size: {
-        sm: 'h-10 px-4 text-sm',
-        md: 'h-12 px-5 text-sm',
-        lg: 'h-[52px] px-7 text-[15px]',
-        xl: 'h-14 px-8 text-base',
-        icon: 'h-12 w-12',
-        'icon-sm': 'h-10 w-10',
-        'icon-lg': 'h-14 w-14',
+        xs: 'h-7 px-2 text-xs rounded',
+        sm: 'h-8 px-3 text-sm rounded-md',
+        md: 'h-9 px-4 text-sm rounded-md',
+        lg: 'h-10 px-5 text-sm rounded-lg',
+        xl: 'h-11 px-6 text-base rounded-lg',
+        icon: 'h-9 w-9 rounded-md',
+        'icon-sm': 'h-8 w-8 rounded-md',
+        'icon-lg': 'h-10 w-10 rounded-lg',
       },
       fullWidth: {
         true: 'w-full',
@@ -102,19 +105,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(buttonVariants({ variant, size, fullWidth, className }))}
         ref={ref}
         disabled={isDisabled}
-        whileHover={!isDisabled && !isLink ? {
-          scale: 1.01,
-          y: -1,
-        } : undefined}
-        whileTap={!isDisabled && !isLink ? {
-          scale: 0.98,
-          y: 0,
-        } : undefined}
-        transition={{
-          type: 'spring',
-          stiffness: 400,
-          damping: 20,
-        }}
+        whileTap={!isDisabled && !isLink ? { scale: 0.98 } : undefined}
+        transition={{ duration: 0.1 }}
         {...props}
       >
         {isLoading ? (
@@ -135,20 +127,14 @@ Button.displayName = 'Button';
 
 function LoadingSpinner() {
   return (
-    <motion.svg
-      className="h-5 w-5"
+    <svg
+      className="h-4 w-4 animate-spin"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
-      animate={{ rotate: 360 }}
-      transition={{
-        duration: 0.8,
-        repeat: Infinity,
-        ease: 'linear',
-      }}
     >
       <circle
-        className="opacity-20"
+        className="opacity-25"
         cx="12"
         cy="12"
         r="10"
@@ -156,11 +142,11 @@ function LoadingSpinner() {
         strokeWidth="3"
       />
       <path
-        className="opacity-90"
+        className="opacity-75"
         fill="currentColor"
         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
       />
-    </motion.svg>
+    </svg>
   );
 }
 

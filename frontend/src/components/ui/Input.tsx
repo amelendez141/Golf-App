@@ -5,21 +5,18 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const inputVariants = cva(
-  'flex w-full rounded-xl border bg-white text-[15px] transition-all duration-200 placeholder:text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]',
+  'w-full text-sm text-gray-900 bg-white border rounded-md transition-all duration-100 ease-out placeholder:text-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50',
   {
     variants: {
       variant: {
-        default:
-          'border-black/[0.08] hover:border-black/[0.12] focus:border-accent focus:ring-4 focus:ring-accent/10 focus:shadow-[inset_0_1px_2px_rgba(0,0,0,0.04),0_0_0_4px_rgba(180,140,70,0.1)]',
-        error:
-          'border-error/50 focus:border-error focus:ring-4 focus:ring-error/10',
-        success:
-          'border-success/50 focus:border-success focus:ring-4 focus:ring-success/10',
+        default: 'border-gray-200 hover:border-gray-300 focus:border-accent focus:ring-2 focus:ring-accent/20',
+        error: 'border-error/50 focus:border-error focus:ring-2 focus:ring-error/20',
+        success: 'border-success/50 focus:border-success focus:ring-2 focus:ring-success/20',
       },
       inputSize: {
-        sm: 'h-11 px-4 text-[15px]',
-        md: 'h-12 px-4 text-[15px]',
-        lg: 'h-14 px-5 text-base',
+        sm: 'h-8 px-3 text-sm',
+        md: 'h-9 px-3 text-sm',
+        lg: 'h-10 px-4 text-sm',
       },
     },
     defaultVariants: {
@@ -63,14 +60,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="mb-2 block text-sm font-semibold text-gray-700 tracking-tight"
+            className="block text-sm font-medium text-gray-700 mb-1.5"
           >
             {label}
           </label>
         )}
         <div className="relative">
           {leftIcon && (
-            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
+            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
               {leftIcon}
             </div>
           )}
@@ -82,8 +79,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 variant: error ? 'error' : variant,
                 inputSize,
               }),
-              leftIcon && 'pl-10',
-              rightIcon && 'pr-10',
+              leftIcon && 'pl-9',
+              rightIcon && 'pr-9',
               className
             )}
             ref={ref}
@@ -92,7 +89,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
               {rightIcon}
             </div>
           )}
@@ -103,7 +100,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           </p>
         )}
         {hint && !error && (
-          <p id={`${inputId}-hint`} className="mt-1.5 text-sm text-text-muted">
+          <p id={`${inputId}-hint`} className="mt-1.5 text-sm text-gray-500">
             {hint}
           </p>
         )}
@@ -130,7 +127,7 @@ const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
           id={inputId}
           className={cn(
             inputVariants({ variant: error ? 'error' : 'default', inputSize }),
-            'peer pt-6 pb-2',
+            'peer pt-5 pb-1.5',
             className
           )}
           ref={ref}
@@ -154,10 +151,10 @@ const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
         <label
           htmlFor={inputId}
           className={cn(
-            'pointer-events-none absolute left-4 transition-all duration-200',
+            'pointer-events-none absolute left-3 transition-all duration-100',
             isFocused || hasValue
-              ? 'top-2 text-xs text-accent'
-              : 'top-1/2 -translate-y-1/2 text-sm text-text-muted',
+              ? 'top-1.5 text-xs text-accent font-medium'
+              : 'top-1/2 -translate-y-1/2 text-sm text-gray-400',
             error && 'text-error'
           )}
         >

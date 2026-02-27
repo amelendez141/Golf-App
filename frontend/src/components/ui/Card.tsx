@@ -6,22 +6,22 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const cardVariants = cva(
-  'rounded-2xl bg-white transition-all duration-300 border',
+  'bg-white rounded-lg border transition-all duration-150 ease-out-expo',
   {
     variants: {
       variant: {
-        default: 'border-black/[0.04] shadow-[0_1px_3px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.04),0_16px_40px_rgba(0,0,0,0.04)]',
-        elevated: 'border-black/[0.03] shadow-[0_2px_4px_rgba(0,0,0,0.02),0_8px_24px_rgba(0,0,0,0.06),0_24px_48px_rgba(0,0,0,0.06)]',
-        flat: 'border-black/[0.06] shadow-none bg-white/80',
-        interactive: 'cursor-pointer border-black/[0.04] shadow-[0_1px_3px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.04)]',
-        glass: 'bg-white/70 backdrop-blur-xl border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.06)]',
+        default: 'border-gray-200/60 shadow-card',
+        elevated: 'border-gray-200/40 shadow-md',
+        flat: 'border-gray-200/80 shadow-none',
+        interactive: 'border-gray-200/60 shadow-card cursor-pointer hover:border-gray-300 hover:shadow-card-hover',
+        ghost: 'border-transparent shadow-none bg-transparent',
       },
       padding: {
         none: '',
-        sm: 'p-4',
-        md: 'p-5 sm:p-6',
-        lg: 'p-6 sm:p-8',
-        xl: 'p-8 sm:p-10',
+        sm: 'p-3',
+        md: 'p-4',
+        lg: 'p-5',
+        xl: 'p-6',
       },
     },
     defaultVariants: {
@@ -44,14 +44,14 @@ export interface CardProps
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant, padding, noAnimation = false, ...props }, ref) => {
-    const isInteractive = variant === 'interactive' || variant === 'elevated';
+    const isInteractive = variant === 'interactive';
 
-    if (noAnimation || (!isInteractive && variant !== 'elevated')) {
+    if (noAnimation) {
       return (
-        <motion.div
-          ref={ref}
+        <div
+          ref={ref as React.Ref<HTMLDivElement>}
           className={cn(cardVariants({ variant, padding, className }))}
-          {...props}
+          {...(props as React.HTMLAttributes<HTMLDivElement>)}
         />
       );
     }
@@ -60,18 +60,13 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <motion.div
         ref={ref}
         className={cn(cardVariants({ variant, padding, className }))}
-        whileHover={{
-          y: -6,
-          boxShadow: '0 4px 8px rgba(0,0,0,0.03), 0 16px 40px rgba(0,0,0,0.08), 0 32px 64px rgba(0,0,0,0.06)',
-          transition: {
-            type: 'spring',
-            stiffness: 300,
-            damping: 20,
-          },
-        }}
-        whileTap={variant === 'interactive' ? {
-          y: -3,
-          scale: 0.99,
+        whileHover={isInteractive ? {
+          y: -2,
+          transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
+        } : undefined}
+        whileTap={isInteractive ? {
+          y: 0,
+          scale: 0.995,
           transition: { duration: 0.1 },
         } : undefined}
         {...props}
@@ -88,7 +83,7 @@ const CardHeader = forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex flex-col space-y-1.5', className)}
+    className={cn('flex flex-col space-y-1', className)}
     {...props}
   />
 ));
@@ -101,7 +96,7 @@ const CardTitle = forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn('font-serif text-xl font-bold tracking-tight leading-tight', className)}
+    className={cn('text-base font-semibold text-gray-900 tracking-tight', className)}
     {...props}
   />
 ));
@@ -114,7 +109,7 @@ const CardDescription = forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-text-muted', className)}
+    className={cn('text-sm text-gray-500', className)}
     {...props}
   />
 ));
@@ -136,7 +131,7 @@ const CardFooter = forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center pt-5', className)}
+    className={cn('flex items-center pt-4', className)}
     {...props}
   />
 ));

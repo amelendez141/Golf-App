@@ -43,7 +43,7 @@ export function Navbar() {
     : '';
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-black/[0.04] bg-white/80 backdrop-blur-2xl backdrop-saturate-200 shadow-[0_1px_0_rgba(0,0,0,0.02),0_4px_20px_rgba(0,0,0,0.03)]">
+    <nav className="sticky top-0 z-40 border-b border-gray-200/60 bg-white/80 backdrop-blur-xl backdrop-saturate-150 shadow-xs">
       <Container>
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -68,10 +68,10 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    'relative px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                    'relative px-3 py-2 text-sm font-medium rounded-md transition-all duration-100',
                     isActive
-                      ? 'text-primary'
-                      : 'text-text-secondary hover:text-primary hover:bg-primary/5'
+                      ? 'text-gray-900'
+                      : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/80'
                   )}
                 >
                   {link.label}
@@ -96,7 +96,7 @@ export function Navbar() {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-primary/5 transition-colors"
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-100 transition-colors duration-100"
                 >
                   <Avatar
                     src={user.avatarUrl}
@@ -104,27 +104,27 @@ export function Navbar() {
                     fallback={userInitials}
                     size="sm"
                   />
-                  <span className="hidden sm:block text-sm font-medium text-primary max-w-[120px] truncate">
+                  <span className="hidden sm:block text-sm font-medium text-gray-700 max-w-[120px] truncate">
                     {user.firstName || user.email.split('@')[0]}
                   </span>
-                  <ChevronDownIcon className="h-4 w-4 text-text-muted" />
+                  <ChevronDownIcon className="h-4 w-4 text-gray-400" />
                 </button>
 
                 <AnimatePresence>
                   {isUserMenuOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      initial={{ opacity: 0, y: -4, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 mt-2 w-56 bg-card rounded-xl shadow-lg border border-primary/10 py-2 z-50"
+                      exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                      transition={{ duration: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200/80 py-1.5 z-50"
                     >
                       {/* User info */}
-                      <div className="px-4 py-3 border-b border-primary/10">
-                        <p className="text-sm font-medium text-primary truncate">
+                      <div className="px-3 py-2.5 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900 truncate">
                           {user.firstName} {user.lastName}
                         </p>
-                        <p className="text-xs text-text-muted truncate">
+                        <p className="text-xs text-gray-500 truncate mt-0.5">
                           {user.email}
                         </p>
                       </div>
@@ -134,7 +134,7 @@ export function Navbar() {
                         <Link
                           href="/profile"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-primary/5 hover:text-primary transition-colors"
+                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-100"
                         >
                           <UserIcon className="h-4 w-4" />
                           Profile
@@ -142,7 +142,7 @@ export function Navbar() {
                         <Link
                           href="/settings"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:bg-primary/5 hover:text-primary transition-colors"
+                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-100"
                         >
                           <SettingsIcon className="h-4 w-4" />
                           Settings
@@ -150,10 +150,10 @@ export function Navbar() {
                       </div>
 
                       {/* Logout */}
-                      <div className="pt-1 border-t border-primary/10">
+                      <div className="pt-1 border-t border-gray-100">
                         <button
                           onClick={handleLogout}
-                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-error hover:bg-error/5 transition-colors"
+                          className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-100"
                         >
                           <LogoutIcon className="h-4 w-4" />
                           Sign Out

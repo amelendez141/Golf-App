@@ -7,28 +7,28 @@ import type { Industry, SkillLevel } from '@/lib/types';
 import { getIndustryInfo, getSkillLevelInfo } from '@/lib/constants';
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full font-semibold tracking-tight transition-all',
+  'inline-flex items-center font-medium transition-colors',
   {
     variants: {
       variant: {
-        default: 'bg-primary/[0.08] text-primary border border-primary/[0.08]',
-        secondary: 'bg-secondary-200 text-text-secondary border border-secondary-300',
-        accent: 'bg-accent/10 text-accent-700 border border-accent/15',
-        success: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
-        warning: 'bg-amber-50 text-amber-700 border border-amber-100',
-        error: 'bg-red-50 text-red-700 border border-red-100',
-        outline: 'border-2 border-primary/15 text-primary bg-transparent',
-        premium: 'bg-gradient-to-r from-accent/15 to-accent/5 text-accent-700 border border-accent/20',
+        default: 'bg-gray-100 text-gray-700',
+        secondary: 'bg-gray-50 text-gray-600 border border-gray-200',
+        accent: 'bg-accent/10 text-accent-700',
+        success: 'bg-emerald-50 text-emerald-700',
+        warning: 'bg-amber-50 text-amber-700',
+        error: 'bg-red-50 text-red-700',
+        outline: 'border border-gray-200 text-gray-600 bg-white',
       },
       size: {
-        sm: 'px-2.5 py-0.5 text-[11px]',
-        md: 'px-3 py-1 text-xs',
-        lg: 'px-3.5 py-1.5 text-sm',
+        xs: 'px-1.5 py-0.5 text-[10px] rounded',
+        sm: 'px-2 py-0.5 text-[11px] rounded',
+        md: 'px-2.5 py-1 text-xs rounded-md',
+        lg: 'px-3 py-1.5 text-sm rounded-md',
       },
     },
     defaultVariants: {
       variant: 'default',
-      size: 'md',
+      size: 'sm',
     },
   }
 );

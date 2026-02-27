@@ -107,10 +107,10 @@ export function TeeTimeCard({
           <div className="absolute bottom-3 left-3.5 right-3.5">
             <div className="flex items-end justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <h3 className="text-[15px] sm:text-base font-serif font-bold text-white line-clamp-1 drop-shadow-sm tracking-tight">
+                <h3 className="text-sm sm:text-base font-semibold text-white line-clamp-1 tracking-tight">
                   {teeTime.course.name}
                 </h3>
-                <p className="text-xs text-white/85 font-medium mt-0.5">
+                <p className="text-xs text-white/80 mt-0.5">
                   {teeTime.course.city}, {teeTime.course.state}
                 </p>
               </div>
@@ -128,8 +128,8 @@ export function TeeTimeCard({
           {/* Date/Time Row */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5 text-accent" />
-              <span className="font-medium text-primary text-base">
+              <CalendarIcon className="h-4 w-4 text-gray-400" />
+              <span className="font-medium text-gray-900 text-sm">
                 {formatSmartDate(teeTime.dateTime)}
               </span>
             </div>
@@ -143,10 +143,10 @@ export function TeeTimeCard({
           />
 
           {/* Slots status text */}
-          <p className="text-sm text-text-muted">
+          <p className="text-sm text-gray-500">
             {filledSlots}/{teeTime.totalSlots} joined
             {hasOpenSlots && (
-              <span className="text-success ml-1">
+              <span className="text-emerald-600 ml-1">
                 • {teeTime.availableSlots} {teeTime.availableSlots === 1 ? 'spot' : 'spots'} open
               </span>
             )}
@@ -164,7 +164,7 @@ export function TeeTimeCard({
             </div>
             {/* Price indicator (if available) */}
             {teeTime.course.greenFee && (
-              <span className="text-xs text-text-muted shrink-0">
+              <span className="text-xs text-gray-400 shrink-0">
                 {'$'.repeat(Math.min(4, Math.ceil(teeTime.course.greenFee / 5000)))}
               </span>
             )}
