@@ -9,8 +9,8 @@ interface PageTransitionProps {
 }
 
 /**
- * Wraps page content with smooth fade/slide transitions between route changes.
- * Use this in layouts to add premium page transitions.
+ * Ultra-fast page transition - optimized for instant navigation feel.
+ * Uses minimal opacity change to avoid any perceived lag.
  */
 export function PageTransition({ children, className }: PageTransitionProps) {
   const pathname = usePathname();
@@ -18,9 +18,9 @@ export function PageTransition({ children, className }: PageTransitionProps) {
   return (
     <motion.div
       key={pathname}
-      initial={{ opacity: 0.8 }}
+      initial={{ opacity: 0.95 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.15 }}
+      transition={{ duration: 0.08, ease: 'easeOut' }}
       className={className}
     >
       {children}
@@ -37,9 +37,9 @@ export function FadeTransition({ children, className }: PageTransitionProps) {
   return (
     <motion.div
       key={pathname}
-      initial={{ opacity: 0.9 }}
+      initial={{ opacity: 0.95 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.1 }}
+      transition={{ duration: 0.06, ease: 'linear' }}
       className={className}
     >
       {children}

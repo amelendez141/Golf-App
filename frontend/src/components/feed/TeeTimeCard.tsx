@@ -70,10 +70,10 @@ export function TeeTimeCard({
       >
         {/* Weather Strip - Top */}
         {weather && (
-          <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-accent/5 border-b border-primary/5">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 bg-gradient-to-r from-accent/[0.08] to-accent/[0.03] border-b border-accent/10">
+            <div className="flex items-center gap-2.5">
               <WeatherIcon icon={weather.icon} className="h-5 w-5 text-accent" />
-              <span className="text-sm font-medium text-primary">{weather.temperature}°F</span>
+              <span className="text-sm font-semibold text-primary tracking-tight">{weather.temperature}°F</span>
               <span className="text-xs text-text-muted hidden xs:inline">{weather.conditions}</span>
             </div>
             {weather.playabilityScore >= 7 && (
@@ -100,22 +100,22 @@ export function TeeTimeCard({
             </div>
           )}
 
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+          {/* Premium gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/5" />
 
           {/* Course name and location overlay */}
-          <div className="absolute bottom-3 left-3 right-3">
-            <div className="flex items-start justify-between gap-2">
+          <div className="absolute bottom-3 left-3.5 right-3.5">
+            <div className="flex items-end justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <h3 className="text-base sm:text-base font-serif font-semibold text-white line-clamp-1">
+                <h3 className="text-[15px] sm:text-base font-serif font-bold text-white line-clamp-1 drop-shadow-sm tracking-tight">
                   {teeTime.course.name}
                 </h3>
-                <p className="text-xs text-white/80">
+                <p className="text-xs text-white/85 font-medium mt-0.5">
                   {teeTime.course.city}, {teeTime.course.state}
                 </p>
               </div>
               {distance !== undefined && distance !== null && (
-                <span className="shrink-0 text-xs text-white/80 bg-black/30 px-2 py-1 rounded-md">
+                <span className="shrink-0 text-[11px] font-semibold text-white bg-white/20 backdrop-blur-sm px-2 py-1 rounded-lg border border-white/10">
                   {distance.toFixed(1)} mi
                 </span>
               )}

@@ -26,7 +26,7 @@ export function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-primary/5 bg-card/95 backdrop-blur-lg lg:hidden safe-left safe-right">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-primary/[0.06] bg-white/90 backdrop-blur-xl backdrop-saturate-150 shadow-[0_-1px_30px_rgba(27,58,45,0.06)] lg:hidden safe-left safe-right">
       {/* Safe area spacer for bottom */}
       <div className="flex items-center justify-around h-[72px] pb-safe">
         {MOBILE_NAV_LINKS.map((link) => {
@@ -44,7 +44,7 @@ export function MobileNav() {
               className={cn(
                 'relative flex flex-col items-center justify-center rounded-xl transition-all duration-200 touch-manipulation select-none-mobile',
                 isPostButton
-                  ? 'bg-accent text-white rounded-full h-14 w-14 -mt-5 shadow-button active:scale-95 active:shadow-none'
+                  ? 'bg-gradient-to-b from-accent to-accent-600 text-white rounded-full h-14 w-14 -mt-5 shadow-[0_4px_20px_rgba(196,162,101,0.4)] active:scale-95 active:shadow-[0_2px_10px_rgba(196,162,101,0.3)] border border-accent-500/30'
                   : 'min-h-[56px] min-w-[64px] px-3 py-2 active:bg-primary/5',
                 isActive && !isPostButton && 'text-primary',
                 !isActive && !isPostButton && 'text-text-muted'

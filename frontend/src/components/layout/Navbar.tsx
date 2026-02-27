@@ -43,13 +43,16 @@ export function Navbar() {
     : '';
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-primary/5 bg-card/80 backdrop-blur-lg">
+    <nav className="sticky top-0 z-40 border-b border-primary/[0.06] bg-white/85 backdrop-blur-xl backdrop-saturate-150 shadow-[0_1px_0_rgba(27,58,45,0.03)]">
       <Container>
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href={isAuthenticated ? '/feed' : '/'} className="flex items-center gap-2">
-            <GolfIcon className="h-8 w-8 text-primary" />
-            <span className="font-serif text-xl font-semibold text-primary">
+          <Link href={isAuthenticated ? '/feed' : '/'} className="flex items-center gap-2.5 group">
+            <div className="relative">
+              <div className="absolute inset-0 bg-accent/20 rounded-full blur-lg group-hover:blur-xl transition-all opacity-0 group-hover:opacity-100" />
+              <GolfIcon className="h-9 w-9 text-primary relative" />
+            </div>
+            <span className="font-serif text-xl font-bold tracking-tight text-primary">
               LinkUp
             </span>
           </Link>

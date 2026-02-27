@@ -6,32 +6,32 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 rounded-xl font-semibold tracking-tight transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         primary:
-          'bg-primary text-white hover:bg-primary-600 shadow-button hover:shadow-button-hover',
+          'bg-primary text-white hover:bg-primary-600 shadow-button hover:shadow-button-hover border border-primary-600/20',
         secondary:
-          'bg-secondary text-primary border border-primary/10 hover:bg-secondary-300 hover:border-primary/20',
+          'bg-white text-primary border border-primary/10 hover:bg-secondary-100 hover:border-primary/15 shadow-sm',
         accent:
-          'bg-accent text-white hover:bg-accent-600 shadow-button hover:shadow-button-hover',
+          'bg-gradient-to-b from-accent to-accent-600 text-white shadow-button hover:shadow-button-hover border border-accent-600/30',
         ghost:
           'text-primary hover:bg-primary/5 active:bg-primary/10',
         outline:
-          'border border-primary/20 text-primary hover:bg-primary/5 hover:border-primary/30',
+          'border-2 border-primary/15 text-primary hover:bg-primary/5 hover:border-primary/25',
         danger:
-          'bg-error text-white hover:bg-red-600',
+          'bg-gradient-to-b from-error to-red-600 text-white border border-red-700/30',
         link:
-          'text-primary underline-offset-4 hover:underline p-0 h-auto',
+          'text-accent font-medium underline-offset-4 hover:underline p-0 h-auto',
       },
       size: {
-        sm: 'h-11 px-3 text-sm', // min 44px for touch targets
-        md: 'h-11 px-4 text-sm', // min 44px for touch targets
-        lg: 'h-12 px-6 text-base',
-        xl: 'h-14 px-8 text-lg',
-        icon: 'h-11 w-11', // min 44px for touch targets
-        'icon-sm': 'h-11 w-11', // min 44px for touch targets
+        sm: 'h-10 px-4 text-sm',
+        md: 'h-11 px-5 text-sm',
+        lg: 'h-12 px-6 text-[15px]',
+        xl: 'h-14 px-8 text-base',
+        icon: 'h-11 w-11',
+        'icon-sm': 'h-10 w-10',
         'icon-lg': 'h-12 w-12',
       },
       fullWidth: {
@@ -82,12 +82,18 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(buttonVariants({ variant, size, fullWidth, className }))}
         ref={ref}
         disabled={isDisabled}
-        whileHover={!isDisabled && !isLink ? { scale: 1.02 } : undefined}
-        whileTap={!isDisabled && !isLink ? { scale: 0.97 } : undefined}
+        whileHover={!isDisabled && !isLink ? {
+          scale: 1.015,
+          y: -1,
+        } : undefined}
+        whileTap={!isDisabled && !isLink ? {
+          scale: 0.98,
+          y: 0,
+        } : undefined}
         transition={{
           type: 'spring',
           stiffness: 500,
-          damping: 30,
+          damping: 25,
         }}
         {...props}
       >
